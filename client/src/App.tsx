@@ -21,27 +21,34 @@ function Router() {
     );
   }
 
+  // If user is not logged in, show landing page and auth pages only
   if (!user) {
     return (
       <Switch>
         <Route path="/" component={LandingPage} />
         <Route path="/auth" component={AuthPage} />
-        <Route path="/:rest*" component={() => {
-          window.location.href = "/auth";
-          return null;
-        }} />
+        <Route path="/dashboard">
+          {() => {
+            window.location.href = "/auth";
+            return null;
+          }}
+        </Route>
+        <Route component={AuthPage} />
       </Switch>
     );
   }
 
+  // If user is logged in, show dashboard and protected routes
   return (
     <Layout>
       <Switch>
         <Route path="/dashboard" component={Dashboard} />
-        <Route path="/" component={() => {
-          window.location.href = "/dashboard";
-          return null;
-        }} />
+        <Route path="/">
+          {() => {
+            window.location.href = "/dashboard";
+            return null;
+          }}
+        </Route>
         <Route component={NotFound} />
       </Switch>
     </Layout>
