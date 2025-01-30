@@ -40,38 +40,22 @@ const rowOne = [...communities, ...communities];
 const rowTwo = [...communities, ...communities];
 
 export default function CommunityCarousel() {
-  const [offsetX, setOffsetX] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setOffsetX((prev) => prev - 1);
-    }, 50); // Adjust speed by changing the interval
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const rowVariants = {
-    animate: (direction: number) => ({
-      x: [0, direction * -225 * communities.length], // 225px is card width
-      transition: {
-        x: {
-          repeat: Infinity,
-          repeatType: "loop",
-          duration: 50,
-          ease: "linear",
-        },
-      },
-    }),
-  };
-
   return (
     <div className="relative w-full overflow-hidden py-8">
       {/* Top row - moving right */}
       <motion.div
         className="flex gap-4 mb-4"
-        variants={rowVariants}
-        animate="animate"
-        custom={1}
+        animate={{
+          x: [-225 * communities.length, 0],
+        }}
+        transition={{
+          x: {
+            repeat: Infinity,
+            repeatType: "loop",
+            duration: 50,
+            ease: "linear",
+          },
+        }}
       >
         {rowOne.map((community) => (
           <Card
@@ -91,9 +75,17 @@ export default function CommunityCarousel() {
       {/* Bottom row - moving left */}
       <motion.div
         className="flex gap-4"
-        variants={rowVariants}
-        animate="animate"
-        custom={-1}
+        animate={{
+          x: [0, -225 * communities.length],
+        }}
+        transition={{
+          x: {
+            repeat: Infinity,
+            repeatType: "loop",
+            duration: 50,
+            ease: "linear",
+          },
+        }}
       >
         {rowTwo.map((community) => (
           <Card
