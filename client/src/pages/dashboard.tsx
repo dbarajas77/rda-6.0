@@ -10,17 +10,13 @@ export default function Dashboard() {
     <div className="relative min-h-screen">
       {/* Background image with reduced opacity */}
       <div 
-        className="fixed inset-0 -z-20 opacity-58"
+        className="fixed inset-0 -z-20"
         style={{
           backgroundImage: 'url("/community-bg.jpg")',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
+          opacity: '0.58'
         }}
-      />
-
-      {/* Light blue overlay with reduced opacity */}
-      <div 
-        className="fixed inset-0 -z-10 bg-blue-100 opacity-65"
       />
 
       {/* Content */}
