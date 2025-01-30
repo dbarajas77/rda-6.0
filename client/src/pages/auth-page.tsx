@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Terminal } from "lucide-react";
 
 // Define a schema for login/register
 const authSchema = z.object({
@@ -23,17 +23,20 @@ const authSchema = z.object({
 
 type AuthFormData = z.infer<typeof authSchema>;
 
+// Development credentials
+const DEV_CREDENTIALS = {
+  username: "dev_user",
+  password: "dev_password",
+  email: "dev@example.com",
+  fullName: "Development User"
+};
+
 export default function AuthPage() {
   const [, setLocation] = useLocation();
   const { login, register: registerUser, user } = useUser();
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
-
-  useEffect(() => {
-    if (user) {
-      setLocation("/dashboard");
-    }
-  }, [user, setLocation]);
+  const [showDevPanel, setShowDevPanel] = useState(false);
 
   const form = useForm<AuthFormData>({
     resolver: zodResolver(authSchema),
@@ -44,6 +47,12 @@ export default function AuthPage() {
       fullName: "",
     },
   });
+
+  useEffect(() => {
+    if (user) {
+      setLocation("/dashboard");
+    }
+  }, [user, setLocation]);
 
   const onSubmit = async (values: AuthFormData, isLogin: boolean) => {
     try {
@@ -74,8 +83,61 @@ export default function AuthPage() {
     setShowPassword(!showPassword);
   };
 
+  const fillDevCredentials = (isLogin: boolean) => {
+    if (isLogin) {
+      form.setValue("username", DEV_CREDENTIALS.username);
+      form.setValue("password", DEV_CREDENTIALS.password);
+    } else {
+      form.setValue("username", DEV_CREDENTIALS.username);
+      form.setValue("password", DEV_CREDENTIALS.password);
+      form.setValue("email", DEV_CREDENTIALS.email);
+      form.setValue("fullName", DEV_CREDENTIALS.fullName);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-secondary/5 px-4">
+      {/* Development Mode Panel */}
+      {import.meta.env.DEV && (
+        <div className="fixed bottom-4 right-4 z-50">
+          <Button
+            variant="outline"
+            size="sm"
+            className="mb-2"
+            onClick={() => setShowDevPanel(!showDevPanel)}
+          >
+            <Terminal className="h-4 w-4 mr-2" />
+            Dev Panel
+          </Button>
+
+          {showDevPanel && (
+            <Card className="w-80 absolute bottom-12 right-0 border-destructive">
+              <CardHeader>
+                <CardTitle className="text-sm font-medium">Development Credentials</CardTitle>
+                <CardDescription className="text-xs">
+                  For testing purposes only
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm">
+                <div>
+                  <p><strong>Username:</strong> {DEV_CREDENTIALS.username}</p>
+                  <p><strong>Password:</strong> {DEV_CREDENTIALS.password}</p>
+                  <p><strong>Email:</strong> {DEV_CREDENTIALS.email}</p>
+                </div>
+                <div className="flex gap-2">
+                  <Button size="sm" onClick={() => fillDevCredentials(true)}>
+                    Fill Login
+                  </Button>
+                  <Button size="sm" onClick={() => fillDevCredentials(false)}>
+                    Fill Register
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
