@@ -8,16 +8,15 @@ import Layout from "@/components/shared/layout";
 export default function Dashboard() {
   return (
     <div className="relative min-h-screen">
-      {/* Background image with reduced opacity */}
-      <div 
-        className="fixed inset-0 -z-20"
-        style={{
-          backgroundImage: 'url("/community-bg.jpg")',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          opacity: '0.58'
-        }}
-      />
+      {/* Background with gradient fallback */}
+      <div className="fixed inset-0 -z-20 bg-gradient-to-br from-background to-secondary/5">
+        <div 
+          className="absolute inset-0 bg-cover bg-center opacity-60"
+          style={{
+            backgroundImage: 'url("/community-bg.jpg")',
+          }}
+        />
+      </div>
 
       {/* Content */}
       <motion.div
