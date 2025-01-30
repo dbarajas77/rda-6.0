@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 
@@ -41,18 +40,18 @@ const rowTwo = [...communities, ...communities];
 
 export default function CommunityCarousel() {
   return (
-    <div className="relative w-full overflow-hidden py-8">
+    <div className="relative w-full overflow-hidden">
       {/* Top row - moving right */}
       <motion.div
         className="flex gap-4 mb-4"
         animate={{
-          x: [-225 * communities.length, 0],
+          x: [-225 * (communities.length + 2), 0],
         }}
         transition={{
           x: {
             repeat: Infinity,
             repeatType: "loop",
-            duration: 50,
+            duration: 40,
             ease: "linear",
           },
         }}
@@ -60,7 +59,7 @@ export default function CommunityCarousel() {
         {rowOne.map((community) => (
           <Card
             key={`${community.id}-1`}
-            className="flex-shrink-0 w-[225px] h-[150px] overflow-hidden"
+            className="flex-shrink-0 w-[200px] sm:w-[225px] h-[120px] sm:h-[150px] overflow-hidden"
           >
             <div
               className="w-full h-full bg-cover bg-center"
@@ -76,13 +75,13 @@ export default function CommunityCarousel() {
       <motion.div
         className="flex gap-4"
         animate={{
-          x: [0, -225 * communities.length],
+          x: [0, -225 * (communities.length + 2)],
         }}
         transition={{
           x: {
             repeat: Infinity,
             repeatType: "loop",
-            duration: 50,
+            duration: 40,
             ease: "linear",
           },
         }}
@@ -90,7 +89,7 @@ export default function CommunityCarousel() {
         {rowTwo.map((community) => (
           <Card
             key={`${community.id}-2`}
-            className="flex-shrink-0 w-[225px] h-[150px] overflow-hidden"
+            className="flex-shrink-0 w-[200px] sm:w-[225px] h-[120px] sm:h-[150px] overflow-hidden"
           >
             <div
               className="w-full h-full bg-cover bg-center"
