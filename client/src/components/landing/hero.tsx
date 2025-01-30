@@ -14,12 +14,12 @@ export default function Hero() {
           }}
           className="text-center max-w-4xl mx-auto px-4 relative"
         >
-          <h1 className="text-4xl font-bold tracking-tighter sm:text-6xl xl:text-7xl/none text-foreground relative pb-4">
+          <h1 className="text-4xl font-bold tracking-tighter sm:text-6xl xl:text-7xl/none text-foreground">
             <span className="animate-shimmer bg-[linear-gradient(110deg,#0A2463,45%,#3E92CC,55%,#0A2463)] bg-[length:200%_100%] inline-block text-transparent bg-clip-text leading-tight">
               Smart Reserve Study Management
             </span>
           </h1>
-          <p className="max-w-[600px] text-zinc-500 md:text-xl dark:text-zinc-400 mx-auto mt-8">
+          <p className="max-w-[600px] text-zinc-500 md:text-xl dark:text-zinc-400 mx-auto mt-24">
             AI-powered insights for your HOA's financial future. Make informed decisions with our intelligent reserve study assistant.
           </p>
         </motion.div>
