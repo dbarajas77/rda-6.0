@@ -3,7 +3,7 @@ import CommunityCarousel from "./community-carousel";
 
 export default function Hero() {
   return (
-    <div className="relative min-h-screen flex flex-col items-center justify-center -mt-16 overflow-hidden bg-gradient-to-b from-background to-secondary/5">
+    <div className="relative min-h-screen flex flex-col items-center justify-center -mt-32 overflow-hidden bg-gradient-to-b from-background to-secondary/5">
       <div className="flex flex-col items-center justify-center gap-12 w-full">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
