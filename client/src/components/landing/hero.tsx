@@ -14,7 +14,7 @@ export default function Hero() {
           }}
           className="text-center max-w-4xl mx-auto px-4 relative"
         >
-          <h1 className="text-4xl font-bold tracking-tighter sm:text-6xl xl:text-7xl/none text-foreground">
+          <h1 className="text-4xl font-bold tracking-tighter sm:text-6xl xl:text-7xl/none text-foreground mb-[74px]">
             <span className="animate-shimmer bg-[linear-gradient(110deg,#0A2463,45%,#3E92CC,55%,#0A2463)] bg-[length:200%_100%] inline-block text-transparent bg-clip-text leading-tight">
               Smart Reserve Study Management
             </span>
