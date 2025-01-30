@@ -26,7 +26,10 @@ function Router() {
       <Switch>
         <Route path="/" component={LandingPage} />
         <Route path="/auth" component={AuthPage} />
-        <Route component={NotFound} />
+        <Route path="/:rest*" component={() => {
+          window.location.href = "/auth";
+          return null;
+        }} />
       </Switch>
     );
   }
@@ -34,7 +37,11 @@ function Router() {
   return (
     <Layout>
       <Switch>
-        <Route path="/" component={Dashboard} />
+        <Route path="/dashboard" component={Dashboard} />
+        <Route path="/" component={() => {
+          window.location.href = "/dashboard";
+          return null;
+        }} />
         <Route component={NotFound} />
       </Switch>
     </Layout>
