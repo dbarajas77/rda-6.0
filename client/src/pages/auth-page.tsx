@@ -5,26 +5,36 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useUser } from "@/hooks/use-user";
 import { useToast } from "@/hooks/use-toast";
-import { insertUserSchema } from "@db/schema";
+import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
+// Define a schema for login/register
+const authSchema = z.object({
+  username: z.string().min(3, "Username must be at least 3 characters"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  email: z.string().email("Invalid email address").optional(),
+  fullName: z.string().min(2, "Full name must be at least 2 characters").optional(),
+});
+
+type AuthFormData = z.infer<typeof authSchema>;
+
 export default function AuthPage() {
   const [, setLocation] = useLocation();
-  const { login, register, user } = useUser();
+  const { login, register: registerUser, user } = useUser();
   const { toast } = useToast();
 
   useEffect(() => {
     if (user) {
-      setLocation("/");
+      setLocation("/dashboard");
     }
   }, [user, setLocation]);
 
-  const form = useForm({
-    resolver: zodResolver(insertUserSchema),
+  const form = useForm<AuthFormData>({
+    resolver: zodResolver(authSchema),
     defaultValues: {
       username: "",
       password: "",
@@ -33,45 +43,52 @@ export default function AuthPage() {
     },
   });
 
-  const onSubmit = async (values: any, isLogin: boolean) => {
+  const onSubmit = async (values: AuthFormData, isLogin: boolean) => {
     try {
-      const result = isLogin ? await login(values) : await register(values);
+      const result = isLogin 
+        ? await login({ username: values.username, password: values.password })
+        : await registerUser(values);
+
       if (!result.ok) {
         throw new Error(result.message);
       }
+
       toast({
         title: "Success",
         description: isLogin ? "Welcome back!" : "Account created successfully",
       });
+
+      setLocation("/dashboard");
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: error.message,
+        title: "Authentication Error",
+        description: error.message || "Please check your credentials and try again",
       });
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-secondary/5 px-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md"
       >
-        <Card>
+        <Card className="backdrop-blur-sm bg-white/95">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold">Welcome</CardTitle>
-            <CardDescription>
-              Sign in to your account or create a new one
+            <CardTitle className="text-2xl font-bold text-center">Welcome</CardTitle>
+            <CardDescription className="text-center">
+              Sign in to access your HOA management dashboard
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="login">
+            <Tabs defaultValue="login" className="space-y-4">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="login">Login</TabsTrigger>
                 <TabsTrigger value="register">Register</TabsTrigger>
               </TabsList>
+
               <Form {...form}>
                 <TabsContent value="login">
                   <form onSubmit={form.handleSubmit((values) => onSubmit(values, true))} className="space-y-4">
@@ -82,7 +99,7 @@ export default function AuthPage() {
                         <FormItem>
                           <FormLabel>Username</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <Input placeholder="Enter your username" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -95,17 +112,18 @@ export default function AuthPage() {
                         <FormItem>
                           <FormLabel>Password</FormLabel>
                           <FormControl>
-                            <Input type="password" {...field} />
+                            <Input type="password" placeholder="Enter your password" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
                     <Button type="submit" className="w-full">
-                      Login
+                      Sign In
                     </Button>
                   </form>
                 </TabsContent>
+
                 <TabsContent value="register">
                   <form onSubmit={form.handleSubmit((values) => onSubmit(values, false))} className="space-y-4">
                     <FormField
@@ -115,7 +133,7 @@ export default function AuthPage() {
                         <FormItem>
                           <FormLabel>Username</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <Input placeholder="Choose a username" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -128,7 +146,7 @@ export default function AuthPage() {
                         <FormItem>
                           <FormLabel>Email</FormLabel>
                           <FormControl>
-                            <Input type="email" {...field} />
+                            <Input type="email" placeholder="Enter your email" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -141,7 +159,7 @@ export default function AuthPage() {
                         <FormItem>
                           <FormLabel>Full Name</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <Input placeholder="Enter your full name" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -154,14 +172,14 @@ export default function AuthPage() {
                         <FormItem>
                           <FormLabel>Password</FormLabel>
                           <FormControl>
-                            <Input type="password" {...field} />
+                            <Input type="password" placeholder="Choose a password" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
                     <Button type="submit" className="w-full">
-                      Register
+                      Create Account
                     </Button>
                   </form>
                 </TabsContent>
