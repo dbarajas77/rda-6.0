@@ -4,9 +4,53 @@ import { setupAuth } from "./auth";
 import { db } from "@db";
 import { scenarios, documents } from "@db/schema";
 import { eq } from "drizzle-orm";
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 export function registerRoutes(app: Express): Server {
   setupAuth(app);
+
+  // AI Analysis endpoint
+  app.post("/api/analysis/financial", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).send("Not authenticated");
+    }
+
+    try {
+      const { data } = req.body;
+
+      const prompt = `Analyze this HOA financial data and provide insights:
+      ${JSON.stringify(data)}
+
+      Please provide:
+      1. Key financial health indicators
+      2. Recommendations for reserve fund allocation
+      3. Potential risks and mitigation strategies
+      4. Long-term financial projections`;
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4",
+        messages: [
+          { role: "system", content: "You are an expert HOA financial analyst assistant." },
+          { role: "user", content: prompt }
+        ],
+        temperature: 0.7,
+        max_tokens: 1500
+      });
+
+      const analysis = completion.choices[0].message.content;
+      res.json({ analysis });
+    } catch (error: any) {
+      console.error('AI Analysis Error:', error);
+      res.status(500).json({ 
+        error: "Failed to generate analysis",
+        details: error.message 
+      });
+    }
+  });
 
   // Scenarios API
   app.get("/api/scenarios", async (req, res) => {
