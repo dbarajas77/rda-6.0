@@ -1,11 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
+import CommunityCarousel from "./community-carousel";
 
 export default function Hero() {
   return (
-    <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-b from-background to-secondary/5">
-      <div className="container px-4 md:px-6">
+    <div className="relative min-h-screen flex items-start justify-center overflow-hidden bg-gradient-to-b from-background to-secondary/5">
+      <div className="container px-4 md:px-6 pt-24"> {/* Moved up with pt-24 */}
         <div className="grid gap-6 items-center">
           <div className="flex flex-col justify-center space-y-4 text-center">
             <motion.div
@@ -35,6 +36,11 @@ export default function Hero() {
                 Learn More
               </Button>
             </motion.div>
+          </div>
+
+          {/* Add the carousel component */}
+          <div className="mt-12">
+            <CommunityCarousel />
           </div>
         </div>
       </div>
