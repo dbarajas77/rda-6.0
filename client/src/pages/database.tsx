@@ -49,8 +49,77 @@ export default function DatabaseManagement() {
       accumReserves: 5000,
       oneTimeReplacement: false
     },
-    // Add more mock components
+    {
+      id: "LIB-002",
+      name: "Asphalt Shingle Roof",
+      category: "roofing",
+      usefulLife: 25,
+      placedInService: "2024-01-15",
+      quantity: 1,
+      currentCost: 45000,
+      accumReserves: 10000
+    },
+    {
+      id: "LIB-003",
+      name: "Tennis Court Surface",
+      category: "amenities",
+      usefulLife: 15,
+      placedInService: "2024-02-01",
+      quantity: 2,
+      currentCost: 25000,
+      accumReserves: 8000
+    },
+    {
+      id: "LIB-004",
+      name: "Exterior Paint",
+      category: "building",
+      usefulLife: 10,
+      placedInService: "2024-01-20",
+      quantity: 1,
+      currentCost: 35000,
+      accumReserves: 15000
+    },
+    {
+      id: "LIB-005",
+      name: "Irrigation System",
+      category: "landscape",
+      usefulLife: 12,
+      placedInService: "2024-02-10",
+      quantity: 1,
+      currentCost: 18000,
+      accumReserves: 6000
+    },
+    {
+      id: "LIB-006",
+      name: "Clubhouse HVAC",
+      category: "building",
+      usefulLife: 15,
+      placedInService: "2024-01-25",
+      quantity: 2,
+      currentCost: 22000,
+      accumReserves: 7500
+    },
+    {
+      id: "LIB-007",
+      name: "Perimeter Fencing",
+      category: "building",
+      usefulLife: 20,
+      placedInService: "2024-02-05",
+      quantity: 1,
+      currentCost: 28000,
+      accumReserves: 9000
+    }
   ];
+
+  const getRandomImage = (category: string) => {
+    const categories: Record<string, string> = {
+      amenities: "swimming+pool+equipment",
+      roofing: "house+roof",
+      building: "building+exterior",
+      landscape: "landscape+design"
+    };
+    return `https://source.unsplash.com/featured/800x600/?${categories[category] || category}`;
+  };
 
   const getRandomImage = (category: string) => {
     const categories = {
