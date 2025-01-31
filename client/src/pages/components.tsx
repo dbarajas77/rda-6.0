@@ -55,21 +55,13 @@ export default function Components() {
           <div className="p-6">
             <div className="flex justify-between items-center mb-6">
               <h1 className="text-2xl font-semibold">Components</h1>
-              <div className="flex gap-3">
-                <Button
-                  onClick={() => setLocation('/database')}
-                  className="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl"
-                >
-                  Back to Database
-                </Button>
-                <Button
-                  onClick={() => setLocation('/components/new')}
-                  className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-lg hover:shadow-xl"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Component
-                </Button>
-              </div>
+              <Button
+                onClick={() => setLocation('/components/new')}
+                className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Component
+              </Button>
             </div>
 
             {/* Search and Filter */}
