@@ -1,9 +1,5 @@
 import { motion } from "framer-motion";
 import QuickAccess from "@/components/dashboard/quick-access";
-import AIAssistant from "@/components/dashboard/ai-assistant";
-import AnalysisSection from "@/components/dashboard/analysis-section";
-import ScenarioSection from "@/components/dashboard/scenario-section";
-import ReportGenerator from "@/components/dashboard/report-generator";
 
 export default function Dashboard() {
   return (
@@ -30,41 +26,6 @@ export default function Dashboard() {
             <h1 className="text-2xl font-semibold text-gray-800 mb-8">Quick Access</h1>
             <QuickAccess />
           </div>
-        </div>
-
-        {/* Additional Sections */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <AnalysisSection />
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.3 }}
-          >
-            <ScenarioSection />
-          </motion.div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.4 }}
-          >
-            <ReportGenerator />
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.5 }}
-          >
-            <AIAssistant />
-          </motion.div>
         </div>
       </motion.div>
     </div>
