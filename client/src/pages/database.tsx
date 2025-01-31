@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Filter } from "lucide-react";
+import { Search, Filter, Database } from "lucide-react";
 import { useLocation } from "wouter";
 
 interface TableInfo {
@@ -15,7 +15,7 @@ interface TableInfo {
   lastModified: string;
 }
 
-export default function Database() {
+export default function DatabaseManagement() {
   const [searchQuery, setSearchQuery] = useState("");
   const [, setLocation] = useLocation();
 
@@ -102,7 +102,7 @@ export default function Database() {
                     <CardContent className="p-6">
                       <div className="flex flex-col items-center text-center space-y-4">
                         <div className="p-3 rounded-full bg-white/90 text-blue-600">
-                          <table.icon className="h-6 w-6" />
+                          <Database className="h-6 w-6" />
                         </div>
                         <div className="space-y-2">
                           <h3 className="font-medium text-lg">{table.name}</h3>
