@@ -10,6 +10,46 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+// Mock documents data
+const mockDocuments = [
+  {
+    id: "1",
+    name: "HOA Bylaws 2024",
+    description: "Updated bylaws for the year 2024",
+    category: "bylaws",
+    createdAt: "2024-01-15",
+    size: "2.4 MB",
+    url: "https://www.africau.edu/images/default/sample.pdf"
+  },
+  {
+    id: "2",
+    name: "Q4 2023 Meeting Minutes",
+    description: "Board meeting minutes from Q4 2023",
+    category: "minutes",
+    createdAt: "2023-12-20",
+    size: "1.1 MB",
+    url: "https://www.africau.edu/images/default/sample.pdf"
+  },
+  {
+    id: "3",
+    name: "Annual Financial Report",
+    description: "Financial report for fiscal year 2023",
+    category: "financial",
+    createdAt: "2024-01-10",
+    size: "3.2 MB",
+    url: "https://www.africau.edu/images/default/sample.pdf"
+  },
+  {
+    id: "4",
+    name: "Maintenance Request Form",
+    description: "Standard form for maintenance requests",
+    category: "forms",
+    createdAt: "2024-01-20",
+    size: "521 KB",
+    url: "https://www.africau.edu/images/default/sample.pdf"
+  }
+];
+
 export function registerRoutes(app: Express): Server {
   setupAuth(app);
 
@@ -50,6 +90,43 @@ export function registerRoutes(app: Express): Server {
         details: error.message 
       });
     }
+  });
+
+  // Documents API
+  app.get("/api/documents", async (req, res) => {
+    // Return mock data for now
+    res.json(mockDocuments);
+  });
+
+  app.post("/api/documents/upload", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).send("Not authenticated");
+    }
+
+    try {
+      // Handle file upload logic here
+      res.json({ message: "File uploaded successfully" });
+    } catch (error: any) {
+      console.error('Upload Error:', error);
+      res.status(500).json({ 
+        error: "Failed to upload file",
+        details: error.message 
+      });
+    }
+  });
+
+  app.get("/api/documents/:id/download", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).send("Not authenticated");
+    }
+
+    const document = mockDocuments.find(d => d.id === req.params.id);
+    if (!document) {
+      return res.status(404).json({ error: "Document not found" });
+    }
+
+    // In real implementation, stream the file from storage
+    res.json({ downloadUrl: document.url });
   });
 
   // Report Generation endpoint
@@ -95,10 +172,10 @@ export function registerRoutes(app: Express): Server {
 
       // Store the generated report
       const [report] = await db.insert(documents).values({
-        userId: req.user.id,
-        title: `Reserve Study Report - ${new Date().toLocaleDateString()}`,
-        content: reportContent,
-        type: 'report'
+        name: `Reserve Study Report - ${new Date().toLocaleDateString()}`,
+        type: 'report',
+        url: '#', // URL would be generated after storing the document
+        userId: req.user.id
       }).returning();
 
       res.json({ 
@@ -141,7 +218,7 @@ export function registerRoutes(app: Express): Server {
     res.json(scenario[0]);
   });
 
-  // Documents API
+  // Documents API (Original, kept for completeness)
   app.get("/api/documents", async (req, res) => {
     if (!req.isAuthenticated()) {
       return res.status(401).send("Not authenticated");
