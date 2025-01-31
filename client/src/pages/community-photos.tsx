@@ -130,10 +130,11 @@ export default function CommunityPhotos() {
       <div 
         className="fixed inset-0 bg-cover bg-center bg-no-repeat z-0"
         style={{
-          backgroundImage: 'url("https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3")'
+          backgroundImage: 'url("https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3")',
+          backgroundAttachment: 'fixed'
         }}
       />
-      <div className="fixed inset-0 bg-white/58 z-10" />
+      <div className="fixed inset-0 bg-white/58 backdrop-blur-[2px] z-10" />
       <div className="relative z-20 p-[100px]">
         <Card className="shadow-xl backdrop-blur-sm bg-white/95">
           <div className="p-6">
