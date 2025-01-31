@@ -5,24 +5,25 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Search, Upload, Plus, MessageCircle } from "lucide-react";
+import { Search, Upload, Plus, MessageCircle, Filter } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface Photo {
   id: string;
   url: string;
   title: string;
-  category: 'general' | 'maintenance' | 'issue';
+  category: 'general' | 'maintenance' | 'issue' | 'landscape' | 'amenities';
   createdAt: string;
   notes?: string[];
 }
 
-// Mock data with notes
+// Mock data with more diverse categories and photos
 const mockPhotos: Photo[] = [
   {
     id: "1",
     url: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c",
     title: "Community Pool",
-    category: 'general',
+    category: 'amenities',
     createdAt: "2024-01-15",
     notes: ["New tiles installed", "Water treatment system upgraded"]
   },
@@ -41,6 +42,45 @@ const mockPhotos: Photo[] = [
     category: 'issue',
     createdAt: "2024-01-25",
     notes: ["Standing water near building A", "Requires immediate attention"]
+  },
+  {
+    id: "4",
+    url: "https://images.unsplash.com/photo-1560518883-ce09059eeffa",
+    title: "Main Entrance",
+    category: 'landscape',
+    createdAt: "2024-01-28",
+    notes: ["Spring flowers planted", "New lighting installed"]
+  },
+  {
+    id: "5",
+    url: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6",
+    title: "Clubhouse Exterior",
+    category: 'general',
+    createdAt: "2024-01-30",
+    notes: ["Fresh paint completed", "New signage installed"]
+  },
+  {
+    id: "6",
+    url: "https://images.unsplash.com/photo-1580587771525-78b9dba3b914",
+    title: "Tennis Courts",
+    category: 'amenities',
+    createdAt: "2024-02-01",
+    notes: ["Resurfacing complete", "New nets installed"]
+  },
+  {
+    id: "7",
+    url: "https://images.unsplash.com/photo-1576941089067-2de3c901e126",
+    title: "Walking Trail",
+    category: 'landscape',
+    createdAt: "2024-02-02",
+    notes: ["Trail markers updated", "New benches installed"]
+  },
+  {
+    id: "8",
+    url: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750",
+    title: "Landscaping Update",
+    category: 'maintenance',
+    createdAt: "2024-02-03"
   }
 ];
 
@@ -50,6 +90,7 @@ export default function CommunityPhotos() {
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
   const [newNote, setNewNote] = useState("");
   const [showEnlargedView, setShowEnlargedView] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
   // Mock query for photos
   const { data: photos = mockPhotos, isLoading } = useQuery<Photo[]>({
@@ -79,37 +120,58 @@ export default function CommunityPhotos() {
     });
 
     setNewNote("");
-    // In a real app, you would update this through an API
     console.log('Updated photos:', updatedPhotos);
   };
 
   const filteredPhotos = photos.filter(photo =>
+    (selectedCategory === "all" || photo.category === selectedCategory) &&
     photo.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
-    <div className="min-h-screen bg-background p-[100px]">
-      <Card className="shadow-lg backdrop-blur-sm">
+    <div 
+      className="min-h-screen bg-cover bg-center p-[100px]"
+      style={{
+        backgroundImage: 'url("https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3")',
+        backgroundAttachment: 'fixed'
+      }}
+    >
+      <Card className="shadow-xl backdrop-blur-sm bg-white/95">
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-semibold">Community Photos</h1>
-            <Button onClick={() => setShowUploadDialog(true)}>
+            <Button 
+              onClick={() => setShowUploadDialog(true)}
+              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition-all duration-300"
+            >
               <Plus className="w-4 h-4 mr-2" />
               Add Photo
             </Button>
           </div>
 
-          {/* Search and Upload */}
-          <div className="flex gap-4 mb-6">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input
-                placeholder="Search photos..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
+          <div className="flex flex-col gap-4 mb-6">
+            <div className="flex gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Input
+                  placeholder="Search photos..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
             </div>
+
+            <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="w-full">
+              <TabsList className="w-full justify-start">
+                <TabsTrigger value="all">All Photos</TabsTrigger>
+                <TabsTrigger value="general">General</TabsTrigger>
+                <TabsTrigger value="maintenance">Maintenance</TabsTrigger>
+                <TabsTrigger value="issue">Issues</TabsTrigger>
+                <TabsTrigger value="landscape">Landscape</TabsTrigger>
+                <TabsTrigger value="amenities">Amenities</TabsTrigger>
+              </TabsList>
+            </Tabs>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
@@ -121,7 +183,10 @@ export default function CommunityPhotos() {
                 className="group"
               >
                 <Card 
-                  className={`p-3 cursor-pointer transition-colors hover:bg-muted/50`}
+                  className={`p-3 cursor-pointer transition-all duration-300 hover:shadow-xl
+                    ${photo.category === 'issue' ? 'hover:border-red-400' :
+                      photo.category === 'maintenance' ? 'hover:border-yellow-400' :
+                      'hover:border-blue-400'}`}
                   onClick={() => {
                     setSelectedPhoto(photo);
                     setShowEnlargedView(true);
@@ -132,9 +197,9 @@ export default function CommunityPhotos() {
                       <img
                         src={photo.url}
                         alt={photo.title}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                       />
-                      <div className="absolute top-2 right-2 bg-white/90 rounded-full p-1">
+                      <div className="absolute top-2 right-2 bg-white/90 rounded-full p-1 shadow-lg">
                         <MessageCircle className={`h-5 w-5 ${photo.notes?.length ? 'text-green-500' : 'text-gray-400'}`} />
                       </div>
                     </div>
@@ -152,31 +217,48 @@ export default function CommunityPhotos() {
 
       {/* Upload Dialog */}
       <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
-        <DialogContent>
+        <DialogContent className="bg-gradient-to-br from-white to-blue-50">
           <DialogHeader>
-            <DialogTitle>Upload Photo</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-xl font-semibold text-blue-700">Upload Photo</DialogTitle>
+            <DialogDescription className="text-blue-600">
               Add a new photo to document community areas
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <Input
-              type="file"
-              accept="image/*"
-              onChange={handlePhotoUpload}
+            <div className="border-2 border-dashed border-blue-200 rounded-lg p-8 text-center hover:border-blue-400 transition-colors">
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoUpload}
+                className="hidden"
+                id="photo-upload"
+              />
+              <label htmlFor="photo-upload" className="cursor-pointer">
+                <Upload className="w-12 h-12 mx-auto text-blue-500 mb-4" />
+                <p className="text-sm text-blue-700">Click to upload or drag and drop</p>
+                <p className="text-xs text-blue-500 mt-1">PNG, JPG up to 10MB</p>
+              </label>
+            </div>
+            <Input 
+              placeholder="Enter photo title"
+              className="border-blue-200 focus:border-blue-400"
             />
-            <Input placeholder="Enter photo title" />
-            <select className="w-full p-2 rounded-md border">
+            <select className="w-full p-2 rounded-md border border-blue-200 focus:border-blue-400">
               <option value="general">General</option>
               <option value="maintenance">Maintenance</option>
               <option value="issue">Issue</option>
+              <option value="landscape">Landscape</option>
+              <option value="amenities">Amenities</option>
             </select>
           </div>
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => setShowUploadDialog(false)}>
               Cancel
             </Button>
-            <Button onClick={() => setShowUploadDialog(false)}>
+            <Button 
+              onClick={() => setShowUploadDialog(false)}
+              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
+            >
               Upload
             </Button>
           </div>
