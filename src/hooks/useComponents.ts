@@ -12,9 +12,9 @@ export function useComponents() {
   return useQuery({
     queryKey: ['components'],
     queryFn: async (): Promise<Component[]> => {
-      // Fetch components data
+      // Fetch components data from the 'database' table
       const { data: components, error: componentsError } = await supabase
-        .from('components')
+        .from('database')
         .select('asset_id, component_name, category')
         .order('asset_id')
 
