@@ -14,14 +14,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Eye, EyeOff, Terminal } from "lucide-react";
 
 // Define a schema for login/register
-const authSchema = z.object({
+const loginSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  email: z.string().email("Invalid email address").optional(),
-  fullName: z.string().min(2, "Full name must be at least 2 characters").optional(),
 });
 
-type AuthFormData = z.infer<typeof authSchema>;
+const registerSchema = loginSchema.extend({
+  email: z.string().email("Invalid email address"),
+  fullName: z.string().min(2, "Full name must be at least 2 characters"),
+});
 
 // Development credentials
 const DEV_CREDENTIALS = {
@@ -39,8 +40,8 @@ export default function AuthPage() {
   const [showDevPanel, setShowDevPanel] = useState(false);
   const [activeTab, setActiveTab] = useState("login");
 
-  const form = useForm<AuthFormData>({
-    resolver: zodResolver(authSchema),
+  const form = useForm({
+    resolver: zodResolver(activeTab === "login" ? loginSchema : registerSchema),
     defaultValues: {
       username: "",
       password: "",
@@ -49,15 +50,18 @@ export default function AuthPage() {
     },
   });
 
+  // Redirect if already logged in
   useEffect(() => {
     if (user) {
       setLocation("/dashboard");
     }
   }, [user, setLocation]);
 
-  const onSubmit = async (values: AuthFormData) => {
+  const onSubmit = async (values: any) => {
     try {
       const isLogin = activeTab === "login";
+      console.log("Submitting form:", { isLogin, values });
+
       const result = isLogin 
         ? await login({
             username: values.username,
@@ -74,8 +78,8 @@ export default function AuthPage() {
         description: isLogin ? "Welcome back!" : "Account created successfully",
       });
 
-      setLocation("/dashboard");
     } catch (error: any) {
+      console.error("Auth error:", error);
       toast({
         variant: "destructive",
         title: "Authentication Error",
@@ -84,27 +88,26 @@ export default function AuthPage() {
     }
   };
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
+  // Reset form when switching tabs
+  useEffect(() => {
+    form.reset({
+      username: "",
+      password: "",
+      email: "",
+      fullName: "",
+    });
+  }, [activeTab]);
 
   const fillDevCredentials = (isLogin: boolean) => {
-    if (isLogin) {
-      setActiveTab("login");
-      form.reset({
-        username: DEV_CREDENTIALS.username,
-        password: DEV_CREDENTIALS.password,
-      });
-    } else {
-      setActiveTab("register");
-      form.reset({
-        username: DEV_CREDENTIALS.username,
-        password: DEV_CREDENTIALS.password,
-        email: DEV_CREDENTIALS.email,
-        fullName: DEV_CREDENTIALS.fullName,
-      });
-    }
-    form.clearErrors();
+    setActiveTab(isLogin ? "login" : "register");
+    const values = isLogin 
+      ? {
+          username: DEV_CREDENTIALS.username,
+          password: DEV_CREDENTIALS.password,
+        }
+      : DEV_CREDENTIALS;
+
+    form.reset(values);
   };
 
   return (
@@ -163,7 +166,7 @@ export default function AuthPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="login" value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="login">Login</TabsTrigger>
                 <TabsTrigger value="register">Register</TabsTrigger>
@@ -197,7 +200,11 @@ export default function AuthPage() {
                           <FormItem>
                             <FormLabel>Email</FormLabel>
                             <FormControl>
-                              <Input type="email" placeholder="Enter your email" {...field} />
+                              <Input 
+                                type="email" 
+                                placeholder="Enter your email" 
+                                {...field} 
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -210,7 +217,10 @@ export default function AuthPage() {
                           <FormItem>
                             <FormLabel>Full Name</FormLabel>
                             <FormControl>
-                              <Input placeholder="Enter your full name" {...field} />
+                              <Input 
+                                placeholder="Enter your full name" 
+                                {...field} 
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -237,7 +247,7 @@ export default function AuthPage() {
                               variant="ghost"
                               size="sm"
                               className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                              onClick={togglePasswordVisibility}
+                              onClick={() => setShowPassword(!showPassword)}
                             >
                               {showPassword ? (
                                 <EyeOff className="h-4 w-4 text-muted-foreground" />
