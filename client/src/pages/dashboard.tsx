@@ -7,34 +7,64 @@ import ReportGenerator from "@/components/dashboard/report-generator";
 
 export default function Dashboard() {
   return (
-    <div className="relative min-h-screen bg-[#f8fafc]">
-      {/* Background */}
+    <div className="min-h-screen relative bg-gradient-to-br from-gray-50 to-gray-100">
+      {/* Background Image with Overlay */}
       <div 
-        className="fixed inset-0 -z-10"
+        className="fixed inset-0 -z-10 bg-cover bg-center"
         style={{
-          backgroundImage: 'url("hoa house.webp")',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          opacity: 0.15
+          backgroundImage: 'url("/hoa house.webp")',
+          filter: 'brightness(0.9) blur(1px)'
         }}
       />
+      <div className="fixed inset-0 -z-10 bg-black/20" />
 
       {/* Content */}
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="container mx-auto p-4 space-y-6"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="container mx-auto py-8 px-4"
       >
-        <QuickAccess />
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <AnalysisSection />
-          <ScenarioSection />
+        {/* Main Card Container */}
+        <div className="rounded-xl backdrop-blur-md bg-white/30 shadow-2xl border border-white/20 overflow-hidden">
+          <div className="p-6">
+            <h1 className="text-2xl font-semibold text-gray-800 mb-8">Quick Access</h1>
+            <QuickAccess />
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <ReportGenerator />
-          <AIAssistant />
+        {/* Additional Sections */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <AnalysisSection />
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <ScenarioSection />
+          </motion.div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <ReportGenerator />
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <AIAssistant />
+          </motion.div>
         </div>
       </motion.div>
     </div>

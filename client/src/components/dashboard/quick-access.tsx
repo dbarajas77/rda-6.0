@@ -9,56 +9,56 @@ const quickAccessItems = [
     icon: BarChart,
     description: "AI-powered analysis of your reserve study data",
     route: "/analysis",
-    bgColor: "bg-blue-50"
+    color: "text-blue-600"
   },
   {
     title: "Graphs",
     icon: FileText,
     description: "Visual representation of financial data",
     route: "/graphs",
-    bgColor: "bg-purple-50"
+    color: "text-purple-600"
   },
   {
     title: "Components",
     icon: Building2,
     description: "Detailed component analysis and tracking",
     route: "/components",
-    bgColor: "bg-green-50"
+    color: "text-green-600"
   },
   {
     title: "Projects",
     icon: ClipboardList,
     description: "Timeline of upcoming replacements",
     route: "/projects",
-    bgColor: "bg-yellow-50"
+    color: "text-yellow-600"
   },
   {
     title: "Community Photos",
     icon: Camera,
     description: "Photo documentation of community assets",
     route: "/photos",
-    bgColor: "bg-pink-50"
+    color: "text-pink-600"
   },
   {
     title: "HOA Documents",
     icon: Files,
     description: "Track and manage HOA documents and records",
     route: "/documents",
-    bgColor: "bg-orange-50"
+    color: "text-orange-600"
   },
   {
     title: "Saved Scenarios",
     icon: Save,
     description: "View and compare different funding scenarios",
     route: "/scenarios",
-    bgColor: "bg-indigo-50"
+    color: "text-indigo-600"
   },
   {
     title: "Database",
     icon: Database,
     description: "Access and manage your community database",
     route: "/database",
-    bgColor: "bg-cyan-50"
+    color: "text-cyan-600"
   }
 ];
 
@@ -66,23 +66,25 @@ export default function QuickAccess() {
   const [, setLocation] = useLocation();
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-6">
       {quickAccessItems.map((item, index) => (
         <motion.div
           key={item.title}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: index * 0.1 }}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           onClick={() => setLocation(item.route)}
         >
-          <Card className={`hover:shadow-lg transition-all cursor-pointer ${item.bgColor} border-none`}>
-            <CardContent className="pt-6">
-              <div className="flex items-start space-x-4">
-                <div className="p-2 rounded-lg bg-white/80">
-                  <item.icon className="h-6 w-6 text-primary" />
+          <Card className="h-full backdrop-blur-sm bg-white/80 hover:bg-white/90 transition-all duration-300 cursor-pointer border border-white/20 shadow-lg">
+            <CardContent className="p-6">
+              <div className="flex flex-col items-center text-center space-y-4">
+                <div className={`p-3 rounded-full bg-white/90 ${item.color}`}>
+                  <item.icon className="h-6 w-6" />
                 </div>
-                <div className="space-y-1">
-                  <h3 className="font-medium text-base">{item.title}</h3>
+                <div className="space-y-2">
+                  <h3 className="font-medium text-lg">{item.title}</h3>
                   <p className="text-sm text-muted-foreground">
                     {item.description}
                   </p>
