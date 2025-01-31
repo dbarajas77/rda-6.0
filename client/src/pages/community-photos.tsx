@@ -88,10 +88,9 @@ export default function CommunityPhotos() {
   );
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="flex h-screen">
-        {/* Left Panel - Document List */}
-        <div className="w-full p-6 overflow-hidden flex flex-col">
+    <div className="min-h-screen bg-background p-[100px]">
+      <Card className="shadow-lg backdrop-blur-sm">
+        <div className="p-6">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-semibold">Community Photos</h1>
             <Button onClick={() => setShowUploadDialog(true)}>
@@ -113,7 +112,7 @@ export default function CommunityPhotos() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 p-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
             {filteredPhotos.map((photo) => (
               <motion.div
                 key={photo.id}
@@ -148,83 +147,83 @@ export default function CommunityPhotos() {
               </motion.div>
             ))}
           </div>
-
-          {/* Upload Dialog */}
-          <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Upload Photo</DialogTitle>
-                <DialogDescription>
-                  Add a new photo to document community areas
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <Input
-                  type="file"
-                  accept="image/*"
-                  onChange={handlePhotoUpload}
-                />
-                <Input placeholder="Enter photo title" />
-                <select className="w-full p-2 rounded-md border">
-                  <option value="general">General</option>
-                  <option value="maintenance">Maintenance</option>
-                  <option value="issue">Issue</option>
-                </select>
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setShowUploadDialog(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={() => setShowUploadDialog(false)}>
-                  Upload
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-
-          {/* Enlarged View Dialog */}
-          <Dialog open={showEnlargedView} onOpenChange={setShowEnlargedView}>
-            <DialogContent className="max-w-2xl">
-              {selectedPhoto && (
-                <div className="space-y-6">
-                  <div className="aspect-video relative rounded-lg overflow-hidden">
-                    <img
-                      src={selectedPhoto.url}
-                      alt={selectedPhoto.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-semibold">{selectedPhoto.title}</h2>
-                    <p className="text-sm text-muted-foreground capitalize">{selectedPhoto.category}</p>
-                  </div>
-
-                  {/* Notes Section */}
-                  <div className="space-y-4">
-                    <h3 className="font-medium text-lg">Notes</h3>
-                    <div className="max-h-[200px] overflow-y-auto space-y-3 pr-2">
-                      {selectedPhoto.notes?.map((note, index) => (
-                        <div key={index} className="bg-muted p-3 rounded-md text-sm">
-                          {note}
-                        </div>
-                      ))}
-                    </div>
-                    <div className="flex gap-2 pt-2">
-                      <Input
-                        placeholder="Add a note..."
-                        value={newNote}
-                        onChange={(e) => setNewNote(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && handleAddNote()}
-                      />
-                      <Button onClick={handleAddNote}>Add Note</Button>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </DialogContent>
-          </Dialog>
         </div>
-      </div>
+      </Card>
+
+      {/* Upload Dialog */}
+      <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Upload Photo</DialogTitle>
+            <DialogDescription>
+              Add a new photo to document community areas
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={handlePhotoUpload}
+            />
+            <Input placeholder="Enter photo title" />
+            <select className="w-full p-2 rounded-md border">
+              <option value="general">General</option>
+              <option value="maintenance">Maintenance</option>
+              <option value="issue">Issue</option>
+            </select>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setShowUploadDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => setShowUploadDialog(false)}>
+              Upload
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Enlarged View Dialog */}
+      <Dialog open={showEnlargedView} onOpenChange={setShowEnlargedView}>
+        <DialogContent className="max-w-2xl">
+          {selectedPhoto && (
+            <div className="space-y-6">
+              <div className="aspect-video relative rounded-lg overflow-hidden">
+                <img
+                  src={selectedPhoto.url}
+                  alt={selectedPhoto.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold">{selectedPhoto.title}</h2>
+                <p className="text-sm text-muted-foreground capitalize">{selectedPhoto.category}</p>
+              </div>
+
+              {/* Notes Section */}
+              <div className="space-y-4">
+                <h3 className="font-medium text-lg">Notes</h3>
+                <div className="max-h-[200px] overflow-y-auto space-y-3 pr-2">
+                  {selectedPhoto.notes?.map((note, index) => (
+                    <div key={index} className="bg-muted p-3 rounded-md text-sm">
+                      {note}
+                    </div>
+                  ))}
+                </div>
+                <div className="flex gap-2 pt-2">
+                  <Input
+                    placeholder="Add a note..."
+                    value={newNote}
+                    onChange={(e) => setNewNote(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleAddNote()}
+                  />
+                  <Button onClick={handleAddNote}>Add Note</Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
