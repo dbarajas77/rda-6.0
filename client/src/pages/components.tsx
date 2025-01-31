@@ -1,15 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Search, Plus } from "lucide-react";
 import { useLocation } from "wouter";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { getOptimizedUnsplashUrl, preloadImages } from "@/lib/image-utils";
 
 interface Component {
   id: string;
@@ -34,10 +33,10 @@ export default function Components() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [showDialog, setShowDialog] = useState(false);
   const [newComponent, setNewComponent] = useState<Partial<Component>>({});
-  const [isImagesLoaded, setIsImagesLoaded] = useState(false);
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
 
+  // API Endpoints for CRUD operations
   const { data: components = [], isLoading } = useQuery<Component[]>({
     queryKey: ['components'],
     queryFn: async () => {
@@ -46,18 +45,6 @@ export default function Components() {
       return response.json();
     }
   });
-
-  useEffect(() => {
-    if (components.length > 0) {
-      const imageUrls = components.map(component => 
-        getOptimizedUnsplashUrl(component.category, 400, 400)
-      );
-
-      preloadImages(imageUrls)
-        .then(() => setIsImagesLoaded(true))
-        .catch(console.error);
-    }
-  }, [components]);
 
   const addMutation = useMutation({
     mutationFn: async (component: Partial<Component>) => {
@@ -119,21 +106,19 @@ export default function Components() {
                 <motion.div
                   key={component.id}
                   initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: isImagesLoaded ? 1 : 0, y: isImagesLoaded ? 0 : 20 }}
-                  transition={{ duration: 0.3 }}
+                  animate={{ opacity: 1, y: 0 }}
                 >
                   <Card 
-                    className="h-[320px] group relative overflow-hidden"
+                    className="h-[320px] group relative overflow-hidden hover:shadow-lg transition-all duration-300"
                     variant="glass"
                     hover={true}
                   >
                     <div className="aspect-square relative">
                       <img
-                        src={getOptimizedUnsplashUrl(component.category, 400, 400)}
+                        src={`https://source.unsplash.com/random/400x400/?${component.category}`}
                         alt={component.name}
                         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                         loading="lazy"
-                        decoding="async"
                       />
                     </div>
                     <CardContent className="p-4 bg-white/80 backdrop-blur-sm">
