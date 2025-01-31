@@ -22,7 +22,7 @@ export default function Dashboard() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="container mx-auto py-8 px-4"
+        className="mx-[100px] py-[100px]"
       >
         {/* Main Card Container */}
         <div className="rounded-xl backdrop-blur-md bg-white/30 shadow-2xl border border-white/20 overflow-hidden">
@@ -37,9 +37,14 @@ export default function Dashboard() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="h-[400px] backdrop-blur-sm bg-blue-50/40 rounded-xl border border-blue-200 shadow-lg hover:shadow-blue-200/50 transition-all duration-300"
+                className="h-[300px] backdrop-blur-sm bg-blue-50/40 rounded-xl border border-blue-200 shadow-lg hover:shadow-blue-200/50 transition-all duration-300"
               >
-                <AnalysisSection />
+                <div className="p-6">
+                  <h3 className="text-xl font-semibold mb-4">Financial Analysis</h3>
+                  <p className="text-gray-600">
+                    Advanced AI-powered financial analysis tools to help you make informed decisions about your HOA's reserve funds.
+                  </p>
+                </div>
               </motion.div>
 
               {/* Scenarios */}
@@ -47,9 +52,14 @@ export default function Dashboard() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="h-[400px] backdrop-blur-sm bg-purple-50/40 rounded-xl border border-purple-200 shadow-lg hover:shadow-purple-200/50 transition-all duration-300"
+                className="h-[300px] backdrop-blur-sm bg-purple-50/40 rounded-xl border border-purple-200 shadow-lg hover:shadow-purple-200/50 transition-all duration-300"
               >
-                <ScenarioSection />
+                <div className="p-6">
+                  <h3 className="text-xl font-semibold mb-4">Funding Scenarios</h3>
+                  <p className="text-gray-600">
+                    Create and compare different funding scenarios to find the optimal strategy for your community's future.
+                  </p>
+                </div>
               </motion.div>
 
               {/* Report Generator */}
@@ -57,9 +67,14 @@ export default function Dashboard() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="h-[400px] backdrop-blur-sm bg-green-50/40 rounded-xl border border-green-200 shadow-lg hover:shadow-green-200/50 transition-all duration-300"
+                className="h-[300px] backdrop-blur-sm bg-green-50/40 rounded-xl border border-green-200 shadow-lg hover:shadow-green-200/50 transition-all duration-300"
               >
-                <ReportGenerator />
+                <div className="p-6">
+                  <h3 className="text-xl font-semibold mb-4">Report Generator</h3>
+                  <p className="text-gray-600">
+                    Generate comprehensive, professional reports for your HOA reserve study with just a few clicks.
+                  </p>
+                </div>
               </motion.div>
             </div>
           </div>
