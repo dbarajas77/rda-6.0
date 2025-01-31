@@ -257,7 +257,7 @@ export function registerRoutes(app: Express): Server {
 
     try {
       const { data, error } = await supabase
-        .from('database_components')
+        .from('database')
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -278,7 +278,7 @@ export function registerRoutes(app: Express): Server {
 
     try {
       const { data, error } = await supabase
-        .from('database_components')
+        .from('database')
         .insert([{
           name: req.body.name,
           category: req.body.category,
@@ -307,7 +307,7 @@ export function registerRoutes(app: Express): Server {
 
     try {
       const { data, error } = await supabase
-        .from('database_components')
+        .from('database')
         .update({
           name: req.body.name,
           category: req.body.category,
@@ -337,7 +337,7 @@ export function registerRoutes(app: Express): Server {
 
     try {
       const { error } = await supabase
-        .from('database_components')
+        .from('database')
         .delete()
         .eq('id', req.params.id);
 
