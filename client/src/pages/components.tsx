@@ -94,12 +94,36 @@ export default function Components() {
           <div className="p-6">
             <div className="flex justify-between items-center mb-6">
               <h1 className="text-3xl font-bold text-gray-800 bg-white/50 px-4 py-2 rounded-lg shadow-sm">Report Components</h1>
-              <Button
-                onClick={() => setLocation('/dashboard')}
-                className="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700"
-              >
-                Dashboard
-              </Button>
+              <div className="flex gap-3">
+                <Button
+                  onClick={() => setLocation('/dashboard')}
+                  className="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700"
+                >
+                  Dashboard
+                </Button>
+                {process.env.NODE_ENV === 'development' && (
+                  <Button
+                    onClick={() => {
+                      const newComponent = {
+                        id: `CMP-${Date.now()}`,
+                        name: `Test Component ${reportComponents.length + 1}`,
+                        category: 'building',
+                        description: 'This is a test component',
+                        lastUpdated: new Date().toISOString(),
+                        condition: 'average',
+                        placedInService: new Date().toISOString().split('T')[0],
+                        photos: [],
+                        siteNotes: 'Test notes'
+                      };
+                      //This needs a way to add to reportComponents.  useMutation or similar would be needed for a real app.
+                      console.log('Adding test component:', newComponent);
+                    }}
+                    variant="outline"
+                  >
+                    Add Test Component
+                  </Button>
+                )}
+              </div>
             </div>
 
             <div className="container mx-auto">
@@ -110,7 +134,7 @@ export default function Components() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <Card 
+                  <Card
                     className="group relative overflow-hidden h-[360px] cursor-pointer"
                     variant="glass"
                     hover={true}
@@ -134,7 +158,7 @@ export default function Components() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <Card 
+                    <Card
                       className="group relative overflow-hidden h-[360px]"
                       variant="glass"
                       hover={true}
@@ -154,9 +178,9 @@ export default function Components() {
                         )}
                         <div className={`absolute top-2 right-2 px-2 py-1 rounded text-xs font-medium ${
                           component.condition === 'new' ? 'bg-green-500/90 text-white' :
-                          component.condition === 'average' ? 'bg-yellow-500/90 text-white' :
-                          component.condition === 'poor' ? 'bg-orange-500/90 text-white' :
-                          'bg-red-500/90 text-white'
+                            component.condition === 'average' ? 'bg-yellow-500/90 text-white' :
+                              component.condition === 'poor' ? 'bg-orange-500/90 text-white' :
+                                'bg-red-500/90 text-white'
                         }`}>
                           {component.condition}
                         </div>
@@ -232,7 +256,7 @@ export default function Components() {
                 >
                   {newPhotos[index - 1] ? (
                     <div className="relative w-full h-full">
-                      <img 
+                      <img
                         src={newPhotos[index - 1]}
                         alt={`Photo ${index}`}
                         className="w-full h-full object-cover rounded-lg"

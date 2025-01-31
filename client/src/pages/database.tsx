@@ -50,7 +50,7 @@ export default function DatabaseManagement() {
   const [newComponent, setNewComponent] = useState<Partial<Component>>({});
   const [, setLocation] = useLocation();
 
-  const mockComponents: Component[] = [
+  const [mockComponents, setMockComponents] = useState([
     {
       id: "LIB-001",
       name: "Pool Equipment",
@@ -122,7 +122,7 @@ export default function DatabaseManagement() {
       currentCost: 28000,
       accumReserves: 9000
     }
-  ];
+  ]);
 
 
   return (
@@ -148,13 +148,27 @@ export default function DatabaseManagement() {
                 >
                   Dashboard
                 </Button>
-                <Button
-                  onClick={() => setShowDialog(true)}
-                  className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Component
-                </Button>
+                {process.env.NODE_ENV === 'development' && (
+                  <Button 
+                    onClick={() => {
+                      const categories = ['roofing', 'amenities', 'building', 'landscape'];
+                      const newComponent = {
+                        id: `LIB-${Date.now()}`,
+                        name: `Test Database Item ${mockComponents.length + 1}`,
+                        category: categories[Math.floor(Math.random() * categories.length)],
+                        usefulLife: Math.floor(Math.random() * 20) + 5,
+                        placedInService: new Date().toISOString().split('T')[0],
+                        quantity: Math.floor(Math.random() * 5) + 1,
+                        currentCost: Math.floor(Math.random() * 50000) + 5000,
+                        accumReserves: Math.floor(Math.random() * 20000)
+                      };
+                      setMockComponents([...mockComponents, newComponent]);
+                    }}
+                    variant="outline"
+                  >
+                    Add Test Item
+                  </Button>
+                )}
               </div>
             </div>
 

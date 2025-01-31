@@ -92,8 +92,9 @@ export default function CommunityPhotos() {
   const [showEnlargedView, setShowEnlargedView] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [, setLocation] = useLocation();
+  const [photos, setPhotos] = useState(mockPhotos); // Added state to manage photos
 
-  const { data: photos = mockPhotos, isLoading } = useQuery<Photo[]>({
+  const { data: photosData = mockPhotos, isLoading } = useQuery<Photo[]>({
     queryKey: ['community-photos'],
     queryFn: async () => mockPhotos
   });
@@ -119,6 +120,7 @@ export default function CommunityPhotos() {
     });
 
     setNewNote("");
+    setPhotos(updatedPhotos); // Update photos state
     console.log('Updated photos:', updatedPhotos);
   };
 
@@ -149,13 +151,24 @@ export default function CommunityPhotos() {
                 >
                   Dashboard
                 </Button>
-                <Button 
-                  onClick={() => setShowUploadDialog(true)}
-                  className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Photo
-                </Button>
+                {process.env.NODE_ENV === 'development' && (
+                  <Button 
+                    onClick={() => {
+                      const newPhoto = {
+                        id: String(Date.now()),
+                        url: "https://picsum.photos/800/600",
+                        title: `Test Photo ${photos.length + 1}`,
+                        category: ['general', 'maintenance', 'issue', 'landscape', 'amenities'][Math.floor(Math.random() * 5)] as any,
+                        createdAt: new Date().toISOString(),
+                        notes: [`Test note ${Math.random()}`]
+                      };
+                      setPhotos([...photos, newPhoto]);
+                    }}
+                    variant="outline"
+                  >
+                    Add Test Photo
+                  </Button>
+                )}
               </div>
             </div>
 
