@@ -188,6 +188,69 @@ export function registerRoutes(app: Express): Server {
 
       // Store the generated report
       const [report] = await db.insert(documents).values({
+
+  // Components API endpoints
+  app.get("/api/components", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).send("Not authenticated");
+    }
+
+    try {
+      const components = await db.query.components.findMany({
+        where: eq(components.userId, req.user.id),
+        orderBy: (components, { desc }) => [desc(components.createdAt)]
+      });
+      res.json(components);
+    } catch (error: any) {
+      console.error('Fetch Components Error:', error);
+      res.status(500).json({ 
+        error: "Failed to fetch components",
+        details: error.message 
+      });
+    }
+  });
+
+  app.post("/api/components", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).send("Not authenticated");
+    }
+
+    try {
+      const [component] = await db.insert(components).values({
+        ...req.body,
+        userId: req.user.id
+      }).returning();
+      res.json(component);
+    } catch (error: any) {
+      console.error('Create Component Error:', error);
+      res.status(500).json({ 
+        error: "Failed to create component",
+        details: error.message 
+      });
+    }
+  });
+
+  app.delete("/api/components/:id", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).send("Not authenticated");
+    }
+
+    try {
+      await db.delete(components)
+        .where(and(
+          eq(components.id, parseInt(req.params.id)),
+          eq(components.userId, req.user.id)
+        ));
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error('Delete Component Error:', error);
+      res.status(500).json({ 
+        error: "Failed to delete component",
+        details: error.message 
+      });
+    }
+  });
+
         name: `Reserve Study Report - ${new Date().toLocaleDateString()}`,
         type: 'report',
         url: '#', // URL would be generated after storing the document
