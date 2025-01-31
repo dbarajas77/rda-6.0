@@ -249,6 +249,108 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Database Components API
+  app.get("/api/database/components", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).send("Not authenticated");
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('database_components')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ 
+        error: "Failed to fetch database components",
+        details: error.message 
+      });
+    }
+  });
+
+  app.post("/api/database/components", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).send("Not authenticated");
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('database_components')
+        .insert([{
+          name: req.body.name,
+          category: req.body.category,
+          useful_life: req.body.usefulLife,
+          current_cost: req.body.currentCost,
+          description: req.body.description,
+          image_url: req.body.imageUrl
+        }])
+        .select()
+        .single();
+
+      if (error) throw error;
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ 
+        error: "Failed to create database component",
+        details: error.message 
+      });
+    }
+  });
+
+  app.put("/api/database/components/:id", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).send("Not authenticated");
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('database_components')
+        .update({
+          name: req.body.name,
+          category: req.body.category,
+          useful_life: req.body.usefulLife,
+          current_cost: req.body.currentCost,
+          description: req.body.description,
+          image_url: req.body.imageUrl
+        })
+        .eq('id', req.params.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ 
+        error: "Failed to update database component",
+        details: error.message 
+      });
+    }
+  });
+
+  app.delete("/api/database/components/:id", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).send("Not authenticated");
+    }
+
+    try {
+      const { error } = await supabase
+        .from('database_components')
+        .delete()
+        .eq('id', req.params.id);
+
+      if (error) throw error;
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ 
+        error: "Failed to delete database component",
+        details: error.message 
+      });
+    }
+  });
+
   app.delete("/api/components/:id", async (req, res) => {
     if (!req.isAuthenticated()) {
       return res.status(401).send("Not authenticated");
