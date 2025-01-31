@@ -8,6 +8,7 @@ import LandingPage from "@/pages/landing-page";
 import AuthPage from "@/pages/auth-page";
 import Dashboard from "@/pages/dashboard";
 import DocumentCenter from "@/pages/document-center";
+import CommunityPhotos from "@/pages/community-photos";
 import NotFound from "@/pages/not-found";
 import Layout from "@/components/shared/layout";
 
@@ -51,6 +52,7 @@ function Router() {
       <Switch>
         <Route path="/dashboard" component={Dashboard} />
         <Route path="/documents" component={DocumentCenter} />
+        <Route path="/photos" component={CommunityPhotos} />
         <Route component={NotFound} />
       </Switch>
     </Layout>
