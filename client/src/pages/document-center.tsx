@@ -5,10 +5,11 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { 
   FileText, Upload, Filter, Search, 
   FileIcon, Book, CheckSquare, Users, 
-  File, Receipt, Download, Printer 
+  File, Receipt, Download, Printer, Share2
 } from "lucide-react";
 
 // Document category definitions with colors
@@ -19,6 +20,12 @@ const categories = [
   { id: 'forms', label: 'Forms', icon: FileText, color: 'text-orange-500' }
 ];
 
+interface Permission {
+  userId: string;
+  email: string;
+  access: 'view' | 'edit' | 'admin';
+}
+
 interface Document {
   id: string;
   name: string;
@@ -27,12 +34,17 @@ interface Document {
   createdAt: string;
   size: string;
   url?: string;
+  ownerId: string;
+  permissions: Permission[];
 }
 
 export default function DocumentCenter() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [shareEmail, setShareEmail] = useState("");
+  const [shareAccess, setShareAccess] = useState<"view" | "edit" | "admin">("view");
 
   // Fetch documents
   const { data: documents = [], isLoading } = useQuery<Document[]>({
@@ -95,6 +107,21 @@ export default function DocumentCenter() {
     if (selectedDocument?.url) {
       const printWindow = window.open(selectedDocument.url, '_blank');
       printWindow?.print();
+    }
+  };
+
+  const handleShare = async () => {
+    if (!selectedDocument || !shareEmail) return;
+
+    try {
+      // Mock API call to share document
+      console.log('Sharing document', selectedDocument.id, 'with', shareEmail, 'access:', shareAccess);
+
+      setShowShareDialog(false);
+      setShareEmail("");
+      setShareAccess("view");
+    } catch (error) {
+      console.error('Share error:', error);
     }
   };
 
@@ -171,6 +198,13 @@ export default function DocumentCenter() {
                               <span className="truncate">{new Date(doc.createdAt).toLocaleDateString()}</span>
                               <span className="mx-2">•</span>
                               <span>{doc.size}</span>
+                              {doc.permissions?.length > 0 && (
+                                <>
+                                  <span className="mx-2">•</span>
+                                  <Users className="w-3 h-3" />
+                                  <span className="ml-1">{doc.permissions.length}</span>
+                                </>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -195,6 +229,10 @@ export default function DocumentCenter() {
                   </p>
                 </div>
                 <div className="flex gap-2">
+                  <Button variant="outline" onClick={() => setShowShareDialog(true)}>
+                    <Share2 className="w-4 h-4 mr-2" />
+                    Share
+                  </Button>
                   <Button variant="outline" onClick={handlePrint}>
                     <Printer className="w-4 h-4 mr-2" />
                     Print
@@ -220,6 +258,63 @@ export default function DocumentCenter() {
                   </div>
                 )}
               </div>
+
+              {/* Share Dialog */}
+              <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Share Document</DialogTitle>
+                    <DialogDescription>
+                      Share "{selectedDocument.name}" with others
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Email</label>
+                      <Input
+                        type="email"
+                        placeholder="Enter email address"
+                        value={shareEmail}
+                        onChange={(e) => setShareEmail(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Access Level</label>
+                      <select
+                        className="w-full p-2 rounded-md border"
+                        value={shareAccess}
+                        onChange={(e) => setShareAccess(e.target.value as "view" | "edit" | "admin")}
+                      >
+                        <option value="view">View</option>
+                        <option value="edit">Edit</option>
+                        <option value="admin">Admin</option>
+                      </select>
+                    </div>
+
+                    {selectedDocument.permissions?.length > 0 && (
+                      <div className="mt-6">
+                        <h4 className="text-sm font-medium mb-2">Shared with</h4>
+                        <div className="space-y-2">
+                          {selectedDocument.permissions.map((permission) => (
+                            <div key={permission.userId} className="flex items-center justify-between text-sm">
+                              <span>{permission.email}</span>
+                              <span className="text-muted-foreground capitalize">{permission.access}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button variant="outline" onClick={() => setShowShareDialog(false)}>
+                      Cancel
+                    </Button>
+                    <Button onClick={handleShare}>
+                      Share
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
           ) : (
             <div className="h-full flex items-center justify-center text-muted-foreground">

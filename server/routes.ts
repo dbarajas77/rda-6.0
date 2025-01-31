@@ -10,7 +10,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Mock documents data
+// Mock documents data with permissions
 const mockDocuments = [
   {
     id: "1",
@@ -19,7 +19,12 @@ const mockDocuments = [
     category: "bylaws",
     createdAt: "2024-01-15",
     size: "2.4 MB",
-    url: "https://www.africau.edu/images/default/sample.pdf"
+    url: "https://www.africau.edu/images/default/sample.pdf",
+    ownerId: "1",
+    permissions: [
+      { userId: "2", email: "board@example.com", access: "edit" },
+      { userId: "3", email: "member@example.com", access: "view" }
+    ]
   },
   {
     id: "2",
@@ -28,7 +33,11 @@ const mockDocuments = [
     category: "minutes",
     createdAt: "2023-12-20",
     size: "1.1 MB",
-    url: "https://www.africau.edu/images/default/sample.pdf"
+    url: "https://www.africau.edu/images/default/sample.pdf",
+    ownerId: "1",
+    permissions: [
+      { userId: "4", email: "secretary@example.com", access: "edit" }
+    ]
   },
   {
     id: "3",
@@ -37,7 +46,12 @@ const mockDocuments = [
     category: "financial",
     createdAt: "2024-01-10",
     size: "3.2 MB",
-    url: "https://www.africau.edu/images/default/sample.pdf"
+    url: "https://www.africau.edu/images/default/sample.pdf",
+    ownerId: "1",
+    permissions: [
+      { userId: "5", email: "treasurer@example.com", access: "admin" },
+      { userId: "6", email: "accountant@example.com", access: "view" }
+    ]
   },
   {
     id: "4",
@@ -46,7 +60,9 @@ const mockDocuments = [
     category: "forms",
     createdAt: "2024-01-20",
     size: "521 KB",
-    url: "https://www.africau.edu/images/default/sample.pdf"
+    url: "https://www.africau.edu/images/default/sample.pdf",
+    ownerId: "1",
+    permissions: []
   }
 ];
 
