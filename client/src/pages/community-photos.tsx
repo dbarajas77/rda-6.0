@@ -5,44 +5,41 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Search, Upload, Plus } from "lucide-react";
+import { Search, Upload, Plus, MessageCircle } from "lucide-react";
 
 interface Photo {
   id: string;
   url: string;
   title: string;
-  description?: string;
-  createdAt: string;
   category: 'general' | 'maintenance' | 'issue';
+  createdAt: string;
   notes?: string[];
 }
 
+// Mock data with notes
 const mockPhotos: Photo[] = [
   {
     id: "1",
     url: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c",
     title: "Community Pool",
-    description: "Recent renovation of the community pool area",
-    createdAt: "2024-01-15",
     category: 'general',
+    createdAt: "2024-01-15",
     notes: ["New tiles installed", "Water treatment system upgraded"]
   },
   {
     id: "2",
     url: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d",
     title: "Playground Equipment",
-    description: "Monthly safety inspection",
-    createdAt: "2024-01-20",
     category: 'maintenance',
+    createdAt: "2024-01-20",
     notes: ["All equipment in good condition", "Minor rust on swing set - scheduled for treatment"]
   },
   {
     id: "3",
     url: "https://images.unsplash.com/photo-1600607687644-4e2a09cf159d",
     title: "Drainage Issue",
-    description: "Water accumulation after recent rain",
-    createdAt: "2024-01-25",
     category: 'issue',
+    createdAt: "2024-01-25",
     notes: ["Standing water near building A", "Requires immediate attention"]
   }
 ];
@@ -52,35 +49,42 @@ export default function CommunityPhotos() {
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
   const [newNote, setNewNote] = useState("");
+  const [showEnlargedView, setShowEnlargedView] = useState(false);
 
   // Mock query for photos
   const { data: photos = mockPhotos, isLoading } = useQuery<Photo[]>({
     queryKey: ['community-photos'],
-    queryFn: async () => {
-      // In real implementation, fetch from API
-      return mockPhotos;
-    }
+    queryFn: async () => mockPhotos
   });
 
   const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-
-    // Mock upload logic
     console.log('Uploading photo:', file.name);
     setShowUploadDialog(false);
   };
 
-  const handleAddNote = (photoId: string) => {
-    if (!newNote.trim()) return;
+  const handleAddNote = () => {
+    if (!newNote.trim() || !selectedPhoto) return;
+
     // Mock adding note
-    console.log('Adding note to photo:', photoId, newNote);
+    const updatedPhotos = photos.map(photo => {
+      if (photo.id === selectedPhoto.id) {
+        return {
+          ...photo,
+          notes: [...(photo.notes || []), newNote]
+        };
+      }
+      return photo;
+    });
+
     setNewNote("");
+    // In a real app, you would update this through an API
+    console.log('Updated photos:', updatedPhotos);
   };
 
   const filteredPhotos = photos.filter(photo =>
-    photo.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    photo.description?.toLowerCase().includes(searchQuery.toLowerCase())
+    photo.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -112,32 +116,29 @@ export default function CommunityPhotos() {
               key={photo.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              onClick={() => setSelectedPhoto(photo)}
             >
-              <Card className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow">
-                <img
-                  src={photo.url}
-                  alt={photo.title}
-                  className="w-full h-48 object-cover"
-                />
+              <Card className="overflow-hidden">
+                <div className="relative">
+                  <img
+                    src={photo.url}
+                    alt={photo.title}
+                    className="w-full h-48 object-cover"
+                  />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className={`absolute top-2 right-2 ${photo.notes?.length ? 'text-green-500' : 'text-gray-400'}`}
+                    onClick={() => {
+                      setSelectedPhoto(photo);
+                      setShowEnlargedView(true);
+                    }}
+                  >
+                    <MessageCircle className="h-5 w-5" />
+                  </Button>
+                </div>
                 <div className="p-4">
-                  <h3 className="font-medium text-lg">{photo.title}</h3>
-                  <p className="text-sm text-muted-foreground mt-1">{photo.description}</p>
-                  <div className="mt-2 space-y-1">
-                    {photo.notes?.map((note, index) => (
-                      <div key={index} className="text-sm bg-muted p-2 rounded-md">
-                        {note}
-                      </div>
-                    ))}
-                  </div>
-                  <div className="mt-4">
-                    <Input
-                      placeholder="Add a note..."
-                      value={newNote}
-                      onChange={(e) => setNewNote(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && handleAddNote(photo.id)}
-                    />
-                  </div>
+                  <h3 className="font-medium">{photo.title}</h3>
+                  <p className="text-sm text-muted-foreground mt-1 capitalize">{photo.category}</p>
                 </div>
               </Card>
             </motion.div>
@@ -150,33 +151,21 @@ export default function CommunityPhotos() {
             <DialogHeader>
               <DialogTitle>Upload Photo</DialogTitle>
               <DialogDescription>
-                Add a new photo to document community areas or maintenance issues
+                Add a new photo to document community areas
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid w-full max-w-sm items-center gap-1.5">
-                <Input
-                  type="file"
-                  accept="image/*"
-                  onChange={handlePhotoUpload}
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Title</label>
-                <Input placeholder="Enter photo title" />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Description</label>
-                <Input placeholder="Enter photo description" />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Category</label>
-                <select className="w-full p-2 rounded-md border">
-                  <option value="general">General</option>
-                  <option value="maintenance">Maintenance</option>
-                  <option value="issue">Issue</option>
-                </select>
-              </div>
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoUpload}
+              />
+              <Input placeholder="Enter photo title" />
+              <select className="w-full p-2 rounded-md border">
+                <option value="general">General</option>
+                <option value="maintenance">Maintenance</option>
+                <option value="issue">Issue</option>
+              </select>
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowUploadDialog(false)}>
@@ -186,6 +175,46 @@ export default function CommunityPhotos() {
                 Upload
               </Button>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Enlarged View Dialog */}
+        <Dialog open={showEnlargedView} onOpenChange={setShowEnlargedView}>
+          <DialogContent className="max-w-3xl">
+            {selectedPhoto && (
+              <div className="space-y-4">
+                <img
+                  src={selectedPhoto.url}
+                  alt={selectedPhoto.title}
+                  className="w-full max-h-[500px] object-contain rounded-lg"
+                />
+                <div>
+                  <h2 className="text-xl font-semibold">{selectedPhoto.title}</h2>
+                  <p className="text-sm text-muted-foreground capitalize">{selectedPhoto.category}</p>
+                </div>
+
+                {/* Notes Section */}
+                <div className="space-y-2">
+                  <h3 className="font-medium">Notes</h3>
+                  <div className="space-y-2">
+                    {selectedPhoto.notes?.map((note, index) => (
+                      <div key={index} className="bg-muted p-2 rounded-md text-sm">
+                        {note}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Add a note..."
+                      value={newNote}
+                      onChange={(e) => setNewNote(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleAddNote()}
+                    />
+                    <Button onClick={handleAddNote}>Add Note</Button>
+                  </div>
+                </div>
+              </div>
+            )}
           </DialogContent>
         </Dialog>
       </div>
