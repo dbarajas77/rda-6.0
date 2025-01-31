@@ -1,13 +1,15 @@
+
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Search, Plus } from "lucide-react";
+import { Search, Plus, Upload, X } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLocation } from "wouter";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface Component {
   id: string;
@@ -18,8 +20,14 @@ interface Component {
   quantity: number;
   currentCost: number;
   accumReserves: number;
+  group?: string;
+  adjustment?: number;
+  unitCost?: number;
+  percentRepl?: number;
+  mntlyContrib?: number;
+  oneTimeReplacement?: boolean;
+  comments?: string;
   remarks?: string;
-  oneTimeReplacement: boolean;
 }
 
 export default function DatabaseManagement() {
@@ -41,12 +49,17 @@ export default function DatabaseManagement() {
       accumReserves: 5000,
       oneTimeReplacement: false
     },
-    // Add more mock components as needed
+    // Add more mock components
   ];
 
-  const handleSubmit = () => {
-    console.log('New component:', newComponent);
-    setShowDialog(false);
+  const getRandomImage = (category: string) => {
+    const categories = {
+      amenities: "swimming+pool+equipment",
+      roofing: "roof",
+      building: "building+exterior",
+      landscape: "landscape+architecture"
+    };
+    return `https://source.unsplash.com/random/400x300/?${categories[category as keyof typeof categories] || category}`;
   };
 
   return (
@@ -82,7 +95,7 @@ export default function DatabaseManagement() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
               {mockComponents.map((component) => (
                 <motion.div
                   key={component.id}
@@ -90,17 +103,19 @@ export default function DatabaseManagement() {
                   animate={{ opacity: 1, y: 0 }}
                 >
                   <Card className="group relative overflow-hidden hover:shadow-lg transition-all duration-300">
-                    <div className="absolute top-2 left-2 bg-white/90 px-2 py-1 rounded text-xs font-medium text-gray-600">
-                      {component.id}
-                    </div>
-                    <div className="p-4 pt-8">
-                      <h3 className="font-medium text-lg mb-2">{component.name}</h3>
-                      <div className="space-y-1 text-sm text-gray-600">
-                        <p>Category: {component.category}</p>
-                        <p>Useful Life: {component.usefulLife} years</p>
-                        <p>Current Cost: ${component.currentCost}</p>
-                        <p>Accumulated Reserves: ${component.accumReserves}</p>
+                    <div className="relative aspect-[4/3]">
+                      <img 
+                        src={getRandomImage(component.category)}
+                        alt={component.name}
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                      <div className="absolute top-2 left-2 bg-white/90 px-2 py-1 rounded text-xs font-medium text-gray-600">
+                        {component.id}
                       </div>
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-medium text-lg mb-1">{component.name}</h3>
+                      <p className="text-sm text-gray-600 capitalize">{component.category}</p>
                     </div>
                   </Card>
                 </motion.div>
@@ -111,72 +126,153 @@ export default function DatabaseManagement() {
       </div>
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Add New Component</DialogTitle>
-            <DialogDescription>Enter the details for the new component</DialogDescription>
+        <DialogContent className="max-w-5xl">
+          <DialogHeader className="border-b pb-4">
+            <div className="flex justify-between items-center">
+              <DialogTitle className="text-xl">Asphalt Shingle Roof</DialogTitle>
+              <Button variant="ghost" size="icon" onClick={() => setShowDialog(false)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
           </DialogHeader>
 
-          <div className="grid grid-cols-2 gap-4">
-            <Input 
-              placeholder="Asset ID"
-              value={newComponent.id || ''}
-              onChange={(e) => setNewComponent({...newComponent, id: e.target.value})}
-            />
-            <Input 
-              placeholder="Component Name"
-              value={newComponent.name || ''}
-              onChange={(e) => setNewComponent({...newComponent, name: e.target.value})}
-            />
-            <Select 
-              value={newComponent.category}
-              onValueChange={(value) => setNewComponent({...newComponent, category: value})}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="roofing">Roofing</SelectItem>
-                <SelectItem value="amenities">Amenities</SelectItem>
-                <SelectItem value="building">Building</SelectItem>
-              </SelectContent>
-            </Select>
-            <Input 
-              type="number"
-              placeholder="Useful Life (years)"
-              value={newComponent.usefulLife || ''}
-              onChange={(e) => setNewComponent({...newComponent, usefulLife: Number(e.target.value)})}
-            />
-            <Input 
-              type="date"
-              placeholder="Placed in Service"
-              value={newComponent.placedInService || ''}
-              onChange={(e) => setNewComponent({...newComponent, placedInService: e.target.value})}
-            />
-            <Input 
-              type="number"
-              placeholder="Current Cost"
-              value={newComponent.currentCost || ''}
-              onChange={(e) => setNewComponent({...newComponent, currentCost: Number(e.target.value)})}
-            />
-            <Input 
-              type="number"
-              placeholder="Accumulated Reserves"
-              value={newComponent.accumReserves || ''}
-              onChange={(e) => setNewComponent({...newComponent, accumReserves: Number(e.target.value)})}
-            />
-            <div className="col-span-2">
-              <Textarea
-                placeholder="Remarks"
-                value={newComponent.remarks || ''}
-                onChange={(e) => setNewComponent({...newComponent, remarks: e.target.value})}
-              />
+          <div className="grid grid-cols-12 gap-6 py-4">
+            {/* Left Column - Image Uploads */}
+            <div className="col-span-4 space-y-4">
+              {[1, 2, 3].map((index) => (
+                <div key={index} className="border-2 border-dashed rounded-lg p-4 text-center hover:border-blue-400 transition-colors">
+                  <Upload className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+                  <p className="text-sm text-gray-600">Upload image {index}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Right Column - Form Fields */}
+            <div className="col-span-8 space-y-6">
+              {/* First Row */}
+              <div className="grid grid-cols-3 gap-4">
+                <Input 
+                  placeholder="Asset ID"
+                  value="LIB-001"
+                  onChange={(e) => setNewComponent({...newComponent, id: e.target.value})}
+                />
+                <Input 
+                  placeholder="Group/Facility"
+                  onChange={(e) => setNewComponent({...newComponent, group: e.target.value})}
+                />
+                <Select 
+                  value={newComponent.category}
+                  onValueChange={(value) => setNewComponent({...newComponent, category: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="roofing">Roofing</SelectItem>
+                    <SelectItem value="amenities">Amenities</SelectItem>
+                    <SelectItem value="building">Building</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Second Row */}
+              <div className="grid grid-cols-3 gap-4">
+                <Input 
+                  type="date"
+                  value="2025-01-04"
+                  onChange={(e) => setNewComponent({...newComponent, placedInService: e.target.value})}
+                />
+                <Input 
+                  type="number"
+                  placeholder="Useful Life"
+                  value="25"
+                  onChange={(e) => setNewComponent({...newComponent, usefulLife: Number(e.target.value)})}
+                />
+                <Input 
+                  type="number"
+                  placeholder="Adjustment"
+                  value="0"
+                  onChange={(e) => setNewComponent({...newComponent, adjustment: Number(e.target.value)})}
+                />
+              </div>
+
+              {/* Third Row */}
+              <div className="grid grid-cols-3 gap-4">
+                <Input 
+                  type="number"
+                  placeholder="Quantity/Unit"
+                  value="0"
+                  onChange={(e) => setNewComponent({...newComponent, quantity: Number(e.target.value)})}
+                />
+                <Input 
+                  type="number"
+                  placeholder="Unit Cost"
+                  value="0"
+                  onChange={(e) => setNewComponent({...newComponent, unitCost: Number(e.target.value)})}
+                />
+                <Input 
+                  type="number"
+                  placeholder="Percent Repl"
+                  value="100"
+                  onChange={(e) => setNewComponent({...newComponent, percentRepl: Number(e.target.value)})}
+                />
+              </div>
+
+              {/* Fourth Row */}
+              <div className="grid grid-cols-3 gap-4">
+                <Input 
+                  type="number"
+                  placeholder="Current Cost"
+                  value="0"
+                  onChange={(e) => setNewComponent({...newComponent, currentCost: Number(e.target.value)})}
+                />
+                <Input 
+                  type="number"
+                  placeholder="Accum Reserves"
+                  value="0"
+                  onChange={(e) => setNewComponent({...newComponent, accumReserves: Number(e.target.value)})}
+                />
+                <Input 
+                  type="number"
+                  placeholder="Mntly Contrbtn"
+                  value="0"
+                  onChange={(e) => setNewComponent({...newComponent, mntlyContrib: Number(e.target.value)})}
+                />
+              </div>
+
+              {/* Additional Fields */}
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="oneTime"
+                    checked={newComponent.oneTimeReplacement}
+                    onCheckedChange={(checked) => setNewComponent({...newComponent, oneTimeReplacement: !!checked})}
+                  />
+                  <label htmlFor="oneTime" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    One Time Replacement
+                  </label>
+                </div>
+                
+                <Textarea
+                  placeholder="Comments"
+                  value={newComponent.comments || ''}
+                  onChange={(e) => setNewComponent({...newComponent, comments: e.target.value})}
+                  className="min-h-[80px]"
+                />
+                
+                <Textarea
+                  placeholder="Remarks"
+                  value={newComponent.remarks || ''}
+                  onChange={(e) => setNewComponent({...newComponent, remarks: e.target.value})}
+                  className="min-h-[80px]"
+                />
+              </div>
             </div>
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="border-t pt-4">
             <Button variant="outline" onClick={() => setShowDialog(false)}>Cancel</Button>
-            <Button onClick={handleSubmit}>Save Component</Button>
+            <Button onClick={() => setShowDialog(false)}>Save Changes</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
