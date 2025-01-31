@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import UserNav from "./user-nav";
 import { useUser } from "@/hooks/use-user";
+import AIAssistant from "./ai-assistant";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { user } = useUser();
@@ -33,6 +34,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </motion.header>
       <main>{children}</main>
+
+      {/* AI Assistant */}
+      <AIAssistant />
     </div>
   );
 }
