@@ -26,7 +26,7 @@ export default function Dashboard() {
         {/* Main Card Container */}
         <div className="rounded-xl overflow-hidden relative">
           {/* Container Background with Gradient */}
-          <div className="absolute inset-0 bg-gradient-to-br from-slate-800/10 via-slate-900/10 to-slate-800/10 backdrop-blur-md" />
+          <div className="absolute inset-0 bg-gradient-to-br from-[#0A2463]/20 via-[#3E92CC]/20 to-[#0A2463]/20 backdrop-blur-md" />
 
           <div className="relative p-6">
             <h1 className="text-2xl font-semibold text-gray-800 mb-8">Quick Access</h1>
