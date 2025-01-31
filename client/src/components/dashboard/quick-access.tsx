@@ -1,9 +1,19 @@
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
-import { BarChart, FileText, Camera, ClipboardList, Building2, Files, PieChart, Calculator, FileBarChart } from "lucide-react";
+import { BarChart, FileText, Camera, ClipboardList, Building2, Files, PieChart, Calculator, FileBarChart, Database } from "lucide-react";
 import { useLocation } from "wouter";
 
 const quickAccessItems = [
+  {
+    title: "RDA Database",
+    icon: Database,
+    description: "Access and manage component data",
+    route: "/database",
+    color: "text-indigo-600",
+    bgColor: "bg-indigo-50/40",
+    borderColor: "border-indigo-200",
+    shadowColor: "shadow-indigo-200/50"
+  },
   {
     title: "Financial Analysis",
     icon: BarChart,
