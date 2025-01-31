@@ -166,7 +166,11 @@ export default function DatabaseManagement() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <Card className="group relative overflow-hidden hover:shadow-lg transition-all duration-300 h-[360px]">
+                  <Card 
+                    className="group relative overflow-hidden h-[360px]"
+                    variant="glass"
+                    hover={true}
+                  >
                     <div className="aspect-[4/3] w-full relative">
                       <img 
                         src={getRandomImage(component.category)}

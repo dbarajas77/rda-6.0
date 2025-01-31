@@ -194,7 +194,9 @@ export default function CommunityPhotos() {
                   className="group"
                 >
                   <Card 
-                    className="h-[360px] cursor-pointer transition-all duration-300 shadow-lg hover:shadow-2xl transform hover:-translate-y-1 overflow-hidden"
+                    className="group relative overflow-hidden h-[360px]"
+                    variant="glass"
+                    hover={true}
                     onClick={() => {
                       setSelectedPhoto(photo);
                       setShowEnlargedView(true);
