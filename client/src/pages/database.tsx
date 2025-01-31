@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Filter } from "lucide-react";
+import { Database as DatabaseIcon, Search, Filter } from "lucide-react";
 import { useLocation } from "wouter";
 
 interface TableInfo {
@@ -15,7 +15,7 @@ interface TableInfo {
   lastModified: string;
 }
 
-export default function Database() {
+export default function DatabasePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [, setLocation] = useLocation();
 
@@ -81,45 +81,49 @@ export default function Database() {
 
             {/* Tables Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredTables.map((table, index) => (
-                <motion.div
-                  key={table.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.1 }}
-                  whileHover={{ 
-                    scale: 1.03,
-                    transition: { duration: 0.2 }
-                  }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <Card 
-                    className={`h-full bg-blue-50/40 hover:shadow-blue-200/50 
-                              transition-all duration-300 cursor-pointer 
-                              border-blue-200 shadow-lg hover:shadow-xl
-                              backdrop-blur-sm hover:bg-white/50`}
+              {isLoading ? (
+                <p>Loading...</p>
+              ) : (
+                filteredTables.map((table, index) => (
+                  <motion.div
+                    key={table.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.1 }}
+                    whileHover={{ 
+                      scale: 1.03,
+                      transition: { duration: 0.2 }
+                    }}
+                    whileTap={{ scale: 0.98 }}
                   >
-                    <CardContent className="p-6">
-                      <div className="flex flex-col items-center text-center space-y-4">
-                        <div className="p-3 rounded-full bg-white/90 text-blue-600">
-                          <table.icon className="h-6 w-6" />
-                        </div>
-                        <div className="space-y-2">
-                          <h3 className="font-medium text-lg">{table.name}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            {table.description}
-                          </p>
-                          <div className="flex items-center justify-center text-xs text-muted-foreground space-x-2">
-                            <span>{table.recordCount} records</span>
-                            <span>•</span>
-                            <span>Last modified: {new Date(table.lastModified).toLocaleDateString()}</span>
+                    <Card 
+                      className={`h-full bg-blue-50/40 hover:shadow-blue-200/50 
+                               transition-all duration-300 cursor-pointer 
+                               border-blue-200 shadow-lg hover:shadow-xl
+                               backdrop-blur-sm hover:bg-white/50`}
+                    >
+                      <CardContent className="p-6">
+                        <div className="flex flex-col items-center text-center space-y-4">
+                          <div className="p-3 rounded-full bg-white/90 text-blue-600">
+                            <DatabaseIcon className="h-6 w-6" />
+                          </div>
+                          <div className="space-y-2">
+                            <h3 className="font-medium text-lg">{table.name}</h3>
+                            <p className="text-sm text-muted-foreground">
+                              {table.description}
+                            </p>
+                            <div className="flex items-center justify-center text-xs text-muted-foreground space-x-2">
+                              <span>{table.recordCount} records</span>
+                              <span>•</span>
+                              <span>Last modified: {new Date(table.lastModified).toLocaleDateString()}</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))
+              )}
             </div>
           </div>
         </Card>
