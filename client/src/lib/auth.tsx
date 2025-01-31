@@ -42,19 +42,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         email,
         password,
       });
-      if (error) throw error;
-      toast({
-        title: "Success",
-        description: "Successfully signed in!",
-      });
-    } catch (error) {
-      if (error instanceof Error) {
+      if (error) {
         toast({
           title: "Authentication Error",
           description: error.message,
           variant: "destructive",
         });
+        throw error;
       }
+    } catch (error) {
+      setError(error as AuthError);
       throw error;
     }
   };
@@ -70,19 +67,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         }
       });
-      if (error) throw error;
-      toast({
-        title: "Success",
-        description: "Check your email for the confirmation link!",
-      });
-    } catch (error) {
-      if (error instanceof Error) {
+      if (error) {
         toast({
           title: "Registration Error",
           description: error.message,
           variant: "destructive",
         });
+        throw error;
       }
+    } catch (error) {
+      setError(error as AuthError);
       throw error;
     }
   };
@@ -91,18 +85,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-      toast({
-        title: "Success",
-        description: "Successfully signed out!",
-      });
     } catch (error) {
-      if (error instanceof Error) {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive",
-        });
-      }
+      setError(error as AuthError);
       throw error;
     }
   };
