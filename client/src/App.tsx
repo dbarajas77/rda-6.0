@@ -1,5 +1,4 @@
 import { Switch, Route, useLocation } from "wouter";
-import { useEffect } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { queryClient } from "./lib/queryClient";
@@ -28,13 +27,15 @@ function Router() {
   }
 
   // Redirect to appropriate page based on auth status
-  useEffect(() => {
-    if (!user && location === '/dashboard') {
-      setLocation('/auth');
-    } else if (user && (location === '/auth' || location === '/')) {
-      setLocation('/dashboard');
-    }
-  }, [user, location]);
+  if (!user && location === '/dashboard') {
+    setLocation('/auth');
+    return null;
+  }
+
+  if (user && (location === '/auth' || location === '/')) {
+    setLocation('/dashboard');
+    return null;
+  }
 
   // If user is not logged in, show landing page and auth pages only
   if (!user) {
