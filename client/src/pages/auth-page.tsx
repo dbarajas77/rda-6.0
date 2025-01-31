@@ -25,8 +25,8 @@ const registerSchema = loginSchema.extend({
 
 // Development credentials
 const DEV_CREDENTIALS = {
-  email: "dan@reservedataanalysis.org",
-  password: "123456",
+  email: "dev@example.com",
+  password: "dev_password",
   fullName: "Development User"
 };
 

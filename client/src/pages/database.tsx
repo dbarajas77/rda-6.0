@@ -7,23 +7,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Search, Plus, Upload, X } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLocation } from "wouter";
-
-// Example usage
-const fetchComponents = async () => {
-  const { data, error } = await executeSql(`
-    SELECT * FROM database_components 
-    WHERE category = $1
-    ORDER BY created_at DESC
-  `, ['electronics']);
-  
-  if (error) {
-    console.error('Error fetching components:', error);
-    return;
-  }
-  
-  console.log('Components:', data);
-};
-
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 

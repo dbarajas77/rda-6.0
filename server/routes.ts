@@ -1,8 +1,9 @@
+
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import { db } from "@db";
-import { scenarios, documents, annotations, annotationReplies, databaseComponents } from "@db/schema";
+import { scenarios, documents, annotations, annotationReplies } from "@db/schema";
 import { eq, and } from "drizzle-orm";
 import OpenAI from "openai";
 
@@ -10,118 +11,64 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+// Mock documents data with permissions
+const mockDocuments = [
+  {
+    id: "1",
+    name: "HOA Bylaws 2024",
+    description: "Updated bylaws for the year 2024",
+    category: "bylaws",
+    createdAt: "2024-01-15",
+    size: "2.4 MB",
+    url: "https://www.africau.edu/images/default/sample.pdf",
+    ownerId: "1",
+    permissions: [
+      { userId: "2", email: "board@example.com", access: "edit" },
+      { userId: "3", email: "member@example.com", access: "view" }
+    ]
+  },
+  {
+    id: "2",
+    name: "Q4 2023 Meeting Minutes",
+    description: "Board meeting minutes from Q4 2023",
+    category: "minutes",
+    createdAt: "2023-12-20",
+    size: "1.1 MB",
+    url: "https://www.africau.edu/images/default/sample.pdf",
+    ownerId: "1",
+    permissions: [
+      { userId: "4", email: "secretary@example.com", access: "edit" }
+    ]
+  },
+  {
+    id: "3",
+    name: "Annual Financial Report",
+    description: "Financial report for fiscal year 2023",
+    category: "financial",
+    createdAt: "2024-01-10",
+    size: "3.2 MB",
+    url: "https://www.africau.edu/images/default/sample.pdf",
+    ownerId: "1",
+    permissions: [
+      { userId: "5", email: "treasurer@example.com", access: "admin" },
+      { userId: "6", email: "accountant@example.com", access: "view" }
+    ]
+  },
+  {
+    id: "4",
+    name: "Maintenance Request Form",
+    description: "Standard form for maintenance requests",
+    category: "forms",
+    createdAt: "2024-01-20",
+    size: "521 KB",
+    url: "https://www.africau.edu/images/default/sample.pdf",
+    ownerId: "1",
+    permissions: []
+  }
+];
+
 export function registerRoutes(app: Express): Server {
   setupAuth(app);
-
-  // Database Components API endpoints
-  app.get("/api/database-components", async (req, res) => {
-    if (!req.isAuthenticated()) {
-      return res.status(401).send("Not authenticated");
-    }
-
-    try {
-      const components = await db.select().from(databaseComponents);
-      res.json(components);
-    } catch (error: any) {
-      console.error('Fetch Components Error:', error);
-      res.status(500).json({ 
-        error: "Failed to fetch components",
-        details: error.message 
-      });
-    }
-  });
-
-  app.post("/api/database-components", async (req, res) => {
-    if (!req.isAuthenticated()) {
-      return res.status(401).send("Not authenticated");
-    }
-
-    try {
-      const [component] = await db.insert(databaseComponents)
-        .values(req.body)
-        .returning();
-      res.json(component);
-    } catch (error: any) {
-      console.error('Create Component Error:', error);
-      res.status(500).json({ 
-        error: "Failed to create component",
-        details: error.message 
-      });
-    }
-  });
-
-  app.get("/api/database-components/:id", async (req, res) => {
-    if (!req.isAuthenticated()) {
-      return res.status(401).send("Not authenticated");
-    }
-
-    try {
-      const [component] = await db.select()
-        .from(databaseComponents)
-        .where(eq(databaseComponents.id, parseInt(req.params.id)));
-
-      if (!component) {
-        return res.status(404).json({ error: "Component not found" });
-      }
-
-      res.json(component);
-    } catch (error: any) {
-      console.error('Fetch Component Error:', error);
-      res.status(500).json({ 
-        error: "Failed to fetch component",
-        details: error.message 
-      });
-    }
-  });
-
-  app.put("/api/database-components/:id", async (req, res) => {
-    if (!req.isAuthenticated()) {
-      return res.status(401).send("Not authenticated");
-    }
-
-    try {
-      const [component] = await db.update(databaseComponents)
-        .set(req.body)
-        .where(eq(databaseComponents.id, parseInt(req.params.id)))
-        .returning();
-
-      if (!component) {
-        return res.status(404).json({ error: "Component not found" });
-      }
-
-      res.json(component);
-    } catch (error: any) {
-      console.error('Update Component Error:', error);
-      res.status(500).json({ 
-        error: "Failed to update component",
-        details: error.message 
-      });
-    }
-  });
-
-  app.delete("/api/database-components/:id", async (req, res) => {
-    if (!req.isAuthenticated()) {
-      return res.status(401).send("Not authenticated");
-    }
-
-    try {
-      const [component] = await db.delete(databaseComponents)
-        .where(eq(databaseComponents.id, parseInt(req.params.id)))
-        .returning();
-
-      if (!component) {
-        return res.status(404).json({ error: "Component not found" });
-      }
-
-      res.json({ message: "Component deleted successfully" });
-    } catch (error: any) {
-      console.error('Delete Component Error:', error);
-      res.status(500).json({ 
-        error: "Failed to delete component",
-        details: error.message 
-      });
-    }
-  });
 
   // AI Analysis endpoint
   app.post("/api/analysis/financial", async (req, res) => {
@@ -261,6 +208,67 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Components API endpoints
+  app.get("/api/components", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).send("Not authenticated");
+    }
+
+    try {
+      const components = await db.query.components.findMany({
+        where: eq(components.userId, req.user.id),
+        orderBy: (components, { desc }) => [desc(components.createdAt)]
+      });
+      res.json(components);
+    } catch (error: any) {
+      console.error('Fetch Components Error:', error);
+      res.status(500).json({ 
+        error: "Failed to fetch components",
+        details: error.message 
+      });
+    }
+  });
+
+  app.post("/api/components", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).send("Not authenticated");
+    }
+
+    try {
+      const [component] = await db.insert(components).values({
+        ...req.body,
+        userId: req.user.id
+      }).returning();
+      res.json(component);
+    } catch (error: any) {
+      console.error('Create Component Error:', error);
+      res.status(500).json({ 
+        error: "Failed to create component",
+        details: error.message 
+      });
+    }
+  });
+
+  app.delete("/api/components/:id", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).send("Not authenticated");
+    }
+
+    try {
+      await db.delete(components)
+        .where(and(
+          eq(components.id, parseInt(req.params.id)),
+          eq(components.userId, req.user.id)
+        ));
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error('Delete Component Error:', error);
+      res.status(500).json({ 
+        error: "Failed to delete component",
+        details: error.message 
+      });
+    }
+  });
 
   // Existing routes...
   app.get("/api/scenarios", async (req, res) => {
@@ -424,58 +432,3 @@ export function registerRoutes(app: Express): Server {
   const httpServer = createServer(app);
   return httpServer;
 }
-
-const mockDocuments = [
-  {
-    id: "1",
-    name: "HOA Bylaws 2024",
-    description: "Updated bylaws for the year 2024",
-    category: "bylaws",
-    createdAt: "2024-01-15",
-    size: "2.4 MB",
-    url: "https://www.africau.edu/images/default/sample.pdf",
-    ownerId: "1",
-    permissions: [
-      { userId: "2", email: "board@example.com", access: "edit" },
-      { userId: "3", email: "member@example.com", access: "view" }
-    ]
-  },
-  {
-    id: "2",
-    name: "Q4 2023 Meeting Minutes",
-    description: "Board meeting minutes from Q4 2023",
-    category: "minutes",
-    createdAt: "2023-12-20",
-    size: "1.1 MB",
-    url: "https://www.africau.edu/images/default/sample.pdf",
-    ownerId: "1",
-    permissions: [
-      { userId: "4", email: "secretary@example.com", access: "edit" }
-    ]
-  },
-  {
-    id: "3",
-    name: "Annual Financial Report",
-    description: "Financial report for fiscal year 2023",
-    category: "financial",
-    createdAt: "2024-01-10",
-    size: "3.2 MB",
-    url: "https://www.africau.edu/images/default/sample.pdf",
-    ownerId: "1",
-    permissions: [
-      { userId: "5", email: "treasurer@example.com", access: "admin" },
-      { userId: "6", email: "accountant@example.com", access: "view" }
-    ]
-  },
-  {
-    id: "4",
-    name: "Maintenance Request Form",
-    description: "Standard form for maintenance requests",
-    category: "forms",
-    createdAt: "2024-01-20",
-    size: "521 KB",
-    url: "https://www.africau.edu/images/default/sample.pdf",
-    ownerId: "1",
-    permissions: []
-  }
-];
