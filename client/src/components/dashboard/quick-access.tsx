@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
-import { BarChart, FileText, Camera, ClipboardList, Building2, Files, Save, Database, PieChart, Calculator, FileBarChart } from "lucide-react";
+import { BarChart, FileText, Camera, ClipboardList, Building2, Files, Database, PieChart, Calculator, FileBarChart } from "lucide-react";
 import { useLocation } from "wouter";
 
 const quickAccessItems = [

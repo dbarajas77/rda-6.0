@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 import LandingPage from "@/pages/landing-page";
 import AuthPage from "@/pages/auth-page";
 import Dashboard from "@/pages/dashboard";
+import DocumentCenter from "@/pages/document-center";
 import NotFound from "@/pages/not-found";
 import Layout from "@/components/shared/layout";
 
@@ -49,6 +50,7 @@ function Router() {
     <Layout>
       <Switch>
         <Route path="/dashboard" component={Dashboard} />
+        <Route path="/documents" component={DocumentCenter} />
         <Route component={NotFound} />
       </Switch>
     </Layout>
