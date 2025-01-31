@@ -1,14 +1,23 @@
 import { pgTable, text, serial, integer, boolean, timestamp, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
+// Users table for authentication
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
-  username: text("username").unique().notNull(),
-  password: text("password").notNull(),
   email: text("email").unique().notNull(),
-  fullName: text("full_name"),
-  createdAt: timestamp("created_at").defaultNow()
+  fullName: text("full_name").notNull(),
+  password: text("password").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow()
 });
+
+// Export types for TypeScript
+export type User = typeof users.$inferSelect;
+export type NewUser = typeof users.$inferInsert;
+
+// Create Zod schemas for validation
+export const insertUserSchema = createInsertSchema(users);
+export const selectUserSchema = createSelectSchema(users);
 
 export const scenarios = pgTable("scenarios", {
   id: serial("id").primaryKey(),
@@ -53,14 +62,10 @@ export const annotationReplies = pgTable("annotation_replies", {
   updatedAt: timestamp("updated_at").defaultNow()
 });
 
-export type User = typeof users.$inferSelect;
-export type NewUser = typeof users.$inferInsert;
 export type Scenario = typeof scenarios.$inferSelect;
 export type Document = typeof documents.$inferSelect;
 export type Annotation = typeof annotations.$inferSelect;
 export type AnnotationReply = typeof annotationReplies.$inferSelect;
 
-export const insertUserSchema = createInsertSchema(users);
-export const selectUserSchema = createSelectSchema(users);
 export const insertAnnotationSchema = createInsertSchema(annotations);
 export const selectAnnotationSchema = createSelectSchema(annotations);
