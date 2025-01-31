@@ -2,6 +2,8 @@ import { motion } from "framer-motion";
 import UserNav from "./user-nav";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
+  const { user } = useUser();
+
   return (
     <div className="min-h-screen">
       <motion.header
@@ -11,7 +13,22 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       >
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <h1 className="text-xl font-bold">HOA Reserve Study</h1>
-          <UserNav />
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 bg-slate-100 py-1.5 px-3 rounded-full">
+              <div className="bg-blue-500 text-white rounded-full h-8 w-8 flex items-center justify-center font-semibold">
+                {user?.fullName
+                  ? user.fullName
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                  : user?.username[0].toUpperCase()}
+              </div>
+              <span className="text-sm font-medium">
+                {user?.fullName || user?.username}
+              </span>
+            </div>
+            <UserNav />
+          </div>
         </div>
       </motion.header>
       <main>{children}</main>
