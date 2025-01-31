@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { supabase } from './lib/supabaseClient'
+import { supabase } from './lib/supabase'
 import { AuthProvider } from "./lib/AuthContext"
 import { AuthForm } from "./components/auth/AuthForm"
 import { useAuth } from "./lib/AuthContext"
