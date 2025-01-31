@@ -11,14 +11,12 @@ export function ComponentCard({ component }: ComponentCardProps) {
   return (
     <Card className="overflow-hidden">
       <div className="aspect-video w-full overflow-hidden">
-        {component.image_url ? (
+        {component.image_url && (
           <img 
             src={component.image_url} 
             alt={component.component_name}
             className="w-full h-full object-cover"
           />
-        ) : (
-          <div className="w-full h-full bg-muted" />
         )}
       </div>
       <CardHeader>

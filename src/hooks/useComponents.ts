@@ -12,34 +12,24 @@ export function useComponents() {
   return useQuery({
     queryKey: ['components'],
     queryFn: async (): Promise<Component[]> => {
-      const { data: components, error: componentsError } = await supabase
+      const { data: components, error } = await supabase
         .from('database')
         .select('asset_id, component_name, category')
-        .order('asset_id')
 
-      if (componentsError) {
-        console.error('Error fetching components:', componentsError)
-        throw new Error(`Error fetching components: ${componentsError.message}`)
-      }
-
-      if (!components) {
-        return []
-      }
+      if (error) throw error
 
       // Get public URLs for all images
-      const componentsWithImages = await Promise.all(
-        components.map(async (component) => {
-          const { data: imageUrl } = supabase
-            .storage
-            .from('database_images')
-            .getPublicUrl(`${component.asset_id}.jpg`)
+      const componentsWithImages = components?.map((component) => {
+        const { data: imageUrl } = supabase
+          .storage
+          .from('database_images')
+          .getPublicUrl(`${component.asset_id}.jpg`)
 
-          return {
-            ...component,
-            image_url: imageUrl?.publicUrl
-          }
-        })
-      )
+        return {
+          ...component,
+          image_url: imageUrl?.publicUrl
+        }
+      }) || []
 
       return componentsWithImages
     }
