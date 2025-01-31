@@ -12,14 +12,18 @@ export function useComponents() {
   return useQuery({
     queryKey: ['components'],
     queryFn: async (): Promise<Component[]> => {
-      // Fetch components data from the 'database' table
       const { data: components, error: componentsError } = await supabase
         .from('database')
         .select('asset_id, component_name, category')
         .order('asset_id')
 
       if (componentsError) {
+        console.error('Error fetching components:', componentsError)
         throw new Error(`Error fetching components: ${componentsError.message}`)
+      }
+
+      if (!components) {
+        return []
       }
 
       // Get public URLs for all images
