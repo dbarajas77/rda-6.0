@@ -5,6 +5,16 @@ import { useLocation } from "wouter";
 
 const quickAccessItems = [
   {
+    title: "Database",
+    icon: Database,
+    description: "Manage and explore HOA database",
+    route: "/database",
+    color: "text-red-600",
+    bgColor: "bg-red-50/40",
+    borderColor: "border-red-200",
+    shadowColor: "shadow-red-200/50"
+  },
+  {
     title: "Financial Analysis",
     icon: BarChart,
     description: "AI-powered analysis of your reserve study data",
