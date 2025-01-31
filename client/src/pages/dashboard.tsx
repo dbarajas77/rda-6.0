@@ -11,7 +11,7 @@ export default function Dashboard() {
       <div 
         className="fixed inset-0 -z-10"
         style={{
-          backgroundImage: 'url("https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80")',
+          backgroundImage: 'url("/Banner-Image.jpg")',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           opacity: 0.15
