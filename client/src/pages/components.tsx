@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -14,12 +15,13 @@ interface Component {
   id: string;
   name: string;
   category: string;
-  description: string;
+  description?: string;
   lastUpdated: string;
   condition: 'critical' | 'poor' | 'average' | 'new';
   placedInService: string;
   photos?: string[];
   siteNotes?: string;
+  currentCost: number;
 }
 
 const mockDatabaseComponents = [
@@ -28,6 +30,7 @@ const mockDatabaseComponents = [
     name: "Swimming Pool Equipment",
     category: "amenities",
     description: "Main pool filtration and heating system",
+    currentCost: 15000,
     lastUpdated: "2024-01-15",
     condition: 'average',
     placedInService: "2020-05-10"
@@ -37,11 +40,12 @@ const mockDatabaseComponents = [
     name: "Clubhouse HVAC",
     category: "building",
     description: "Central air conditioning system",
+    currentCost: 22000,
     lastUpdated: "2024-01-20",
     condition: 'poor',
     placedInService: "2018-11-15"
   }
-];
+] as Component[];
 
 export default function Components() {
   const [selectedDBComponent, setSelectedDBComponent] = useState<Component | null>(null);
@@ -52,22 +56,36 @@ export default function Components() {
   const [condition, setCondition] = useState<Component['condition']>('average');
   const [placedInService, setPlacedInService] = useState("");
   const [notes, setNotes] = useState("");
+  const [reportComponents, setReportComponents] = useState<Component[]>([]);
   const [, setLocation] = useLocation();
 
-  const { data: reportComponents = [], isLoading } = useQuery<Component[]>({
-    queryKey: ['report-components'],
-    queryFn: async () => {
-      // This would fetch the components added to the current report
-      return [];
+  const handleAddToReport = () => {
+    if (selectedDBComponent) {
+      const newComponent = {
+        ...selectedDBComponent,
+        name: customName || selectedDBComponent.name,
+        condition,
+        placedInService,
+        siteNotes: notes,
+        photos: newPhotos,
+        lastUpdated: new Date().toISOString()
+      };
+      setReportComponents([...reportComponents, newComponent]);
+      setShowComponentForm(false);
+      setSelectedDBComponent(null);
+      resetForm();
     }
-  });
-
-  const handlePhotoCapture = () => {
-    // In a real implementation, this would use the device camera
-    console.log("Capturing photo...");
   };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const resetForm = () => {
+    setCustomName("");
+    setCondition('average');
+    setPlacedInService("");
+    setNotes("");
+    setNewPhotos([]);
+  };
+
+  const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
@@ -94,108 +112,79 @@ export default function Components() {
           <div className="p-6">
             <div className="flex justify-between items-center mb-6">
               <h1 className="text-3xl font-bold text-gray-800 bg-white/50 px-4 py-2 rounded-lg shadow-sm">Report Components</h1>
-              <div className="flex gap-3">
-                <Button
-                  onClick={() => setLocation('/dashboard')}
-                  className="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700"
-                >
-                  Dashboard
-                </Button>
-                {process.env.NODE_ENV === 'development' && (
-                  <Button
-                    onClick={() => {
-                      const newComponent = {
-                        id: `CMP-${Date.now()}`,
-                        name: `Test Component ${reportComponents.length + 1}`,
-                        category: 'building',
-                        description: 'This is a test component',
-                        lastUpdated: new Date().toISOString(),
-                        condition: 'average',
-                        placedInService: new Date().toISOString().split('T')[0],
-                        photos: [],
-                        siteNotes: 'Test notes'
-                      };
-                      //This needs a way to add to reportComponents.  useMutation or similar would be needed for a real app.
-                      console.log('Adding test component:', newComponent);
-                    }}
-                    variant="outline"
-                  >
-                    Add Test Component
-                  </Button>
-                )}
-              </div>
+              <Button
+                onClick={() => setLocation('/dashboard')}
+                className="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700"
+              >
+                Dashboard
+              </Button>
             </div>
 
-            <div className="container mx-auto">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-                {/* Add Component Card */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {/* Add Component Card */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Card
+                  className="group relative overflow-hidden h-[360px] cursor-pointer"
+                  variant="glass"
+                  hover={true}
+                  onClick={() => setShowDatabaseDialog(true)}
+                >
+                  <div className="h-full flex flex-col items-center justify-center p-6 text-center">
+                    <Plus className="w-12 h-12 text-muted-foreground mb-4" />
+                    <h3 className="font-medium text-lg mb-2">Add Component</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Click to select a component from the database
+                    </p>
+                  </div>
+                </Card>
+              </motion.div>
+
+              {/* Report Components */}
+              {reportComponents.map((component) => (
                 <motion.div
+                  key={component.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <Card
-                    className="group relative overflow-hidden h-[360px] cursor-pointer"
+                  <Card 
+                    className="group relative overflow-hidden h-[360px]"
                     variant="glass"
                     hover={true}
-                    onClick={() => setShowDatabaseDialog(true)}
                   >
-                    <div className="h-full flex flex-col items-center justify-center p-6 text-center">
-                      <Plus className="w-12 h-12 text-muted-foreground mb-4" />
-                      <h3 className="font-medium text-lg mb-2">Add Component</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Click to select a component from the database
-                      </p>
+                    <div className="aspect-[4/3] w-full relative">
+                      {component.photos?.[0] ? (
+                        <img
+                          src={component.photos[0]}
+                          alt={component.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-muted flex items-center justify-center">
+                          <Camera className="w-8 h-8 text-muted-foreground" />
+                        </div>
+                      )}
+                      <div className={`absolute top-2 right-2 px-2 py-1 rounded text-xs font-medium ${
+                        component.condition === 'new' ? 'bg-green-500/90 text-white' :
+                          component.condition === 'average' ? 'bg-yellow-500/90 text-white' :
+                            component.condition === 'poor' ? 'bg-orange-500/90 text-white' :
+                              'bg-red-500/90 text-white'
+                      }`}>
+                        {component.condition}
+                      </div>
                     </div>
+                    <CardContent className="p-4">
+                      <h3 className="font-medium text-lg mb-2">{component.name}</h3>
+                      <p className="text-sm text-muted-foreground mb-2">{component.description}</p>
+                      <p className="text-sm">Cost: ${component.currentCost.toLocaleString()}</p>
+                    </CardContent>
                   </Card>
                 </motion.div>
-
-                {/* Existing Report Components */}
-                {reportComponents.map((component) => (
-                  <motion.div
-                    key={component.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <Card
-                      className="group relative overflow-hidden h-[360px]"
-                      variant="glass"
-                      hover={true}
-                    >
-                      <div className="aspect-[4/3] w-full relative">
-                        {component.photos?.[0] ? (
-                          <img
-                            src={component.photos[0]}
-                            alt={component.name}
-                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-muted flex items-center justify-center">
-                            <Camera className="w-8 h-8 text-muted-foreground" />
-                          </div>
-                        )}
-                        <div className={`absolute top-2 right-2 px-2 py-1 rounded text-xs font-medium ${
-                          component.condition === 'new' ? 'bg-green-500/90 text-white' :
-                            component.condition === 'average' ? 'bg-yellow-500/90 text-white' :
-                              component.condition === 'poor' ? 'bg-orange-500/90 text-white' :
-                                'bg-red-500/90 text-white'
-                        }`}>
-                          {component.condition}
-                        </div>
-                      </div>
-                      <CardContent className="p-4 bg-white/80 backdrop-blur-sm">
-                        <h3 className="font-medium text-lg mb-2 line-clamp-1">{component.name}</h3>
-                        <p className="text-sm text-muted-foreground mb-2 line-clamp-2">{component.description}</p>
-                        <div className="text-xs text-muted-foreground">
-                          Placed in service: {new Date(component.placedInService).toLocaleDateString()}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))}
-              </div>
+              ))}
             </div>
           </div>
         </Card>
@@ -227,6 +216,7 @@ export default function Components() {
                 <CardContent className="p-4">
                   <h3 className="font-medium mb-2">{component.name}</h3>
                   <p className="text-sm text-muted-foreground">{component.description}</p>
+                  <p className="text-sm mt-2">Cost: ${component.currentCost.toLocaleString()}</p>
                 </CardContent>
               </Card>
             ))}
@@ -250,10 +240,7 @@ export default function Components() {
             {/* Photo Upload Section */}
             <div className="grid grid-cols-3 gap-4">
               {[1, 2, 3].map((index) => (
-                <div
-                  key={index}
-                  className="relative aspect-square"
-                >
+                <div key={index} className="relative aspect-square">
                   {newPhotos[index - 1] ? (
                     <div className="relative w-full h-full">
                       <img
@@ -273,8 +260,7 @@ export default function Components() {
                       <input
                         type="file"
                         accept="image/*"
-                        capture="environment"
-                        onChange={handleFileUpload}
+                        onChange={handlePhotoUpload}
                         className="hidden"
                         id={`photo-${index}`}
                       />
@@ -282,8 +268,8 @@ export default function Components() {
                         htmlFor={`photo-${index}`}
                         className="w-full h-full border-2 border-dashed rounded-lg p-4 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-primary/50 transition-colors"
                       >
-                        <Camera className="w-8 h-8 text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground">Take Photo {index}</span>
+                        <Upload className="w-8 h-8 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground">Upload Photo {index}</span>
                       </label>
                     </div>
                   )}
@@ -294,10 +280,9 @@ export default function Components() {
             {/* Component Details Form */}
             <div className="space-y-4">
               <Input
-                placeholder="Custom Name"
+                placeholder="Custom Name (optional)"
                 value={customName}
                 onChange={(e) => setCustomName(e.target.value)}
-                className="w-full"
               />
 
               <Select value={condition} onValueChange={(value: Component['condition']) => setCondition(value)}>
@@ -316,11 +301,10 @@ export default function Components() {
                 type="date"
                 value={placedInService}
                 onChange={(e) => setPlacedInService(e.target.value)}
-                className="w-full"
               />
 
               <Textarea
-                placeholder="Add notes about the component's condition, measurements, or other relevant details..."
+                placeholder="Site Notes..."
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 className="min-h-[100px]"
@@ -329,26 +313,8 @@ export default function Components() {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowComponentForm(false)}>
-              Cancel
-            </Button>
-            <Button onClick={() => {
-              // Here we would save the component to the report with all the collected data
-              const newComponent = {
-                ...selectedDBComponent!,
-                name: customName || selectedDBComponent!.name,
-                condition,
-                placedInService,
-                siteNotes: notes,
-                photos: newPhotos,
-                lastUpdated: new Date().toISOString()
-              };
-              // Add to report components
-              console.log('New component:', newComponent);
-              setShowComponentForm(false);
-            }}>
-              Add to Report
-            </Button>
+            <Button variant="outline" onClick={() => setShowComponentForm(false)}>Cancel</Button>
+            <Button onClick={handleAddToReport}>Add to Report</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
