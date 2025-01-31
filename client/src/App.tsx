@@ -10,6 +10,7 @@ import Dashboard from "@/pages/dashboard";
 import DocumentCenter from "@/pages/document-center";
 import CommunityPhotos from "@/pages/community-photos";
 import Components from "@/pages/components";
+import DatabaseManagement from "@/pages/database";
 import NotFound from "@/pages/not-found";
 import Layout from "@/components/shared/layout";
 
@@ -55,6 +56,7 @@ function Router() {
         <Route path="/documents" component={DocumentCenter} />
         <Route path="/photos" component={CommunityPhotos} />
         <Route path="/components" component={Components} />
+        <Route path="/database" component={DatabaseManagement} />
         <Route component={NotFound} />
       </Switch>
     </Layout>
