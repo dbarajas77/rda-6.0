@@ -4,13 +4,14 @@ import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useLocation } from "wouter";
 import { 
   FileText, Upload, Filter, Search, 
   FileIcon, Book, CheckSquare, Users, 
-  File, Receipt, Download, Printer, Share2
+  File, Receipt, Download, X, Share2
 } from "lucide-react";
 
 // Document category definitions with colors
@@ -42,10 +43,12 @@ interface Document {
 export default function DocumentCenter() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [showPreview, setShowPreview] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [shareEmail, setShareEmail] = useState("");
   const [shareAccess, setShareAccess] = useState<"view" | "edit" | "admin">("view");
+  const [selectedDocuments, setSelectedDocuments] = useState<Set<string>>(new Set());
   const [, setLocation] = useLocation();
 
   // Fetch documents
@@ -68,7 +71,6 @@ export default function DocumentCenter() {
 
   const handleShare = async () => {
     if (!selectedDocument || !shareEmail) return;
-
     try {
       console.log('Sharing document', selectedDocument.id, 'with', shareEmail, 'access:', shareAccess);
       setShowShareDialog(false);
@@ -100,31 +102,37 @@ export default function DocumentCenter() {
     }
   };
 
-  const downloadDocument = async (docId: string) => {
+  const downloadSelectedDocuments = async () => {
     try {
-      const response = await fetch(`/api/documents/${docId}/download`);
-      if (!response.ok) throw new Error('Download failed');
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = selectedDocument?.name || 'document';
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
+      for (const docId of selectedDocuments) {
+        const doc = documents.find(d => d.id === docId);
+        if (doc?.url) {
+          const response = await fetch(`/api/documents/${docId}/download`);
+          if (!response.ok) throw new Error('Download failed');
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = doc.name;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+        }
+      }
     } catch (error) {
       console.error('Download error:', error);
     }
   };
 
-  const handlePrint = () => {
-    if (selectedDocument?.url) {
-      const printWindow = window.open(selectedDocument.url, '_blank');
-      printWindow?.print();
+  const toggleDocumentSelection = (docId: string) => {
+    const newSelection = new Set(selectedDocuments);
+    if (newSelection.has(docId)) {
+      newSelection.delete(docId);
+    } else {
+      newSelection.add(docId);
     }
+    setSelectedDocuments(newSelection);
   };
-
 
   return (
     <div className="min-h-screen bg-cover bg-center relative">
@@ -141,12 +149,23 @@ export default function DocumentCenter() {
           <div className="p-6">
             <div className="flex justify-between items-center mb-6">
               <h1 className="text-2xl font-semibold">Document Management</h1>
-              <Button 
-                onClick={() => setLocation('/dashboard')}
-                className="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl"
-              >
-                Dashboard
-              </Button>
+              <div className="flex gap-3">
+                <Button 
+                  onClick={() => setLocation('/dashboard')}
+                  className="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+                >
+                  Dashboard
+                </Button>
+                {selectedDocuments.size > 0 && (
+                  <Button
+                    onClick={downloadSelectedDocuments}
+                    className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Download Selected ({selectedDocuments.size})
+                  </Button>
+                )}
+              </div>
             </div>
 
             {/* Search and Upload */}
@@ -175,8 +194,8 @@ export default function DocumentCenter() {
             </div>
 
             {/* Document Categories */}
-            <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="flex-1 overflow-hidden flex flex-col">
-              <TabsList className="mb-4 shadow-md">
+            <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
+              <TabsList className="mb-6 shadow-md">
                 <TabsTrigger value="all">All</TabsTrigger>
                 {categories.map(category => (
                   <TabsTrigger key={category.id} value={category.id}>
@@ -185,54 +204,91 @@ export default function DocumentCenter() {
                 ))}
               </TabsList>
 
-              {/* Documents List */}
-              <div className="flex-1 overflow-y-auto">
-                <div className="space-y-2">
-                  {filteredDocuments.map((doc: Document) => {
-                    const category = categories.find(c => c.id === doc.category);
-                    return (
-                      <motion.div
-                        key={doc.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="group"
+              {/* Documents Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {filteredDocuments.map((doc: Document) => {
+                  const category = categories.find(c => c.id === doc.category);
+                  return (
+                    <motion.div
+                      key={doc.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="group relative"
+                    >
+                      <Card 
+                        className={`p-6 cursor-pointer transition-all duration-300 shadow-lg hover:shadow-2xl transform hover:-translate-y-1
+                          ${selectedDocuments.has(doc.id) ? 'ring-2 ring-primary' : ''}`}
+                        onClick={() => {
+                          setSelectedDocument(doc);
+                          setShowPreview(true);
+                        }}
                       >
-                        <Card 
-                          className={`p-3 cursor-pointer transition-all duration-300 shadow-lg hover:shadow-2xl transform hover:-translate-y-1 ${
-                            selectedDocument?.id === doc.id ? 'bg-muted' : 'hover:bg-muted/50'
-                          }`}
-                          onClick={() => setSelectedDocument(doc)}
+                        {/* Checkbox */}
+                        <div 
+                          className="absolute top-2 right-2 z-10"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleDocumentSelection(doc.id);
+                          }}
                         >
-                          <div className="flex items-start gap-3">
-                            <div className={`p-2 rounded-lg bg-muted ${category?.color || 'text-foreground'}`}>
-                              {category?.icon && <category.icon className="w-4 h-4" />}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-medium truncate text-sm">{doc.name}</h3>
-                              <div className="mt-1 flex items-center text-xs text-muted-foreground">
-                                <span className="truncate">{new Date(doc.createdAt).toLocaleDateString()}</span>
-                                <span className="mx-2">•</span>
-                                <span>{doc.size}</span>
-                                {doc.permissions?.length > 0 && (
-                                  <>
-                                    <span className="mx-2">•</span>
-                                    <Users className="w-3 h-3" />
-                                    <span className="ml-1">{doc.permissions.length}</span>
-                                  </>
-                                )}
-                              </div>
+                          <Checkbox
+                            checked={selectedDocuments.has(doc.id)}
+                            className="data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
+                          />
+                        </div>
+
+                        <div className="flex flex-col items-center text-center space-y-4">
+                          <div className={`p-3 rounded-full bg-white/90 ${category?.color || 'text-foreground'}`}>
+                            {category?.icon && <category.icon className="h-6 w-6" />}
+                          </div>
+                          <div className="space-y-2">
+                            <h3 className="font-medium text-lg truncate">{doc.name}</h3>
+                            <p className="text-sm text-muted-foreground truncate">
+                              {doc.description || category?.label}
+                            </p>
+                            <div className="flex items-center justify-center text-xs text-muted-foreground space-x-2">
+                              <span>{new Date(doc.createdAt).toLocaleDateString()}</span>
+                              <span>•</span>
+                              <span>{doc.size}</span>
                             </div>
                           </div>
-                        </Card>
-                      </motion.div>
-                    );
-                  })}
-                </div>
+                        </div>
+                      </Card>
+                    </motion.div>
+                  );
+                })}
               </div>
             </Tabs>
           </div>
         </Card>
       </div>
+
+      {/* Preview Dialog */}
+      <Dialog open={showPreview} onOpenChange={setShowPreview}>
+        <DialogContent className="max-w-4xl h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="flex justify-between items-center">
+              <span>{selectedDocument?.name}</span>
+              <Button variant="ghost" size="icon" onClick={() => setShowPreview(false)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 h-full">
+            {selectedDocument?.url ? (
+              <iframe
+                src={selectedDocument.url}
+                className="w-full h-full rounded-lg border"
+                title={selectedDocument.name}
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                Preview not available
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Share Dialog */}
       <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
@@ -266,20 +322,6 @@ export default function DocumentCenter() {
                 <option value="admin">Admin</option>
               </select>
             </div>
-
-            {selectedDocument?.permissions?.length > 0 && (
-              <div className="mt-6">
-                <h4 className="text-sm font-medium mb-2">Shared with</h4>
-                <div className="space-y-2">
-                  {selectedDocument.permissions.map((permission) => (
-                    <div key={permission.userId} className="flex items-center justify-between text-sm">
-                      <span>{permission.email}</span>
-                      <span className="text-muted-foreground capitalize">{permission.access}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => setShowShareDialog(false)} className="shadow-lg hover:shadow-xl">
