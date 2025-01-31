@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, jsonb, date, decimal } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 // Users table for authentication
@@ -11,14 +11,47 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").defaultNow()
 });
 
+// Database components table
+export const databaseComponents = pgTable("database_components", {
+  id: serial("id").primaryKey(),
+  assetId: integer("asset_id").notNull(),
+  componentName: text("component_name").notNull(),
+  groupFacility: text("group_facility"),
+  category: text("category"),
+  imageUrl: text("image_url"),
+  usefulLife: integer("useful_life"),
+  lifeRange: text("life_range"),
+  effectiveDate: date("effective_date"),
+  resource: text("resource"),
+  quantity: decimal("quantity"),
+  unit: text("unit"),
+  salvage: decimal("salvage"),
+  unitCost: decimal("unit_cost"),
+  standard1: text("standard1"), 
+  standard2: text("standard2"), 
+  standard3: text("standard3"),
+  standard4: text("standard4"),
+  standard5: text("standard5"),
+  replacementPercentage: integer("replacement_percentage"),
+  comments: text("comments"),
+  remarks: text("remarks"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow()
+});
+
 // Export types for TypeScript
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
+export type DatabaseComponent = typeof databaseComponents.$inferSelect;
+export type NewDatabaseComponent = typeof databaseComponents.$inferInsert;
 
 // Create Zod schemas for validation
 export const insertUserSchema = createInsertSchema(users);
 export const selectUserSchema = createSelectSchema(users);
+export const insertDatabaseComponentSchema = createInsertSchema(databaseComponents);
+export const selectDatabaseComponentSchema = createSelectSchema(databaseComponents);
 
+// Keep existing tables below
 export const scenarios = pgTable("scenarios", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => users.id),
@@ -38,21 +71,19 @@ export const documents = pgTable("documents", {
   createdAt: timestamp("created_at").defaultNow()
 });
 
-// New annotations table
 export const annotations = pgTable("annotations", {
   id: serial("id").primaryKey(),
   documentId: integer("document_id").references(() => documents.id).notNull(),
   userId: integer("user_id").references(() => users.id).notNull(),
   content: text("content").notNull(),
-  position: jsonb("position"), // Stores coordinates/position of annotation in document
-  type: text("type").notNull(), // 'highlight', 'comment', 'drawing', etc.
+  position: jsonb("position"),
+  type: text("type").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-  parentId: integer("parent_id").references(() => annotations.id), // For threaded comments
-  metadata: jsonb("metadata") // Additional annotation data (color, drawing paths, etc.)
+  parentId: integer("parent_id").references(() => annotations.id),
+  metadata: jsonb("metadata")
 });
 
-// New comment replies table for threaded discussions
 export const annotationReplies = pgTable("annotation_replies", {
   id: serial("id").primaryKey(),
   annotationId: integer("annotation_id").references(() => annotations.id).notNull(),
