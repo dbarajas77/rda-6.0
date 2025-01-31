@@ -3,30 +3,29 @@ import QuickAccess from "@/components/dashboard/quick-access";
 
 export default function Dashboard() {
   return (
-    <div className="min-h-screen relative bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-cover bg-center relative">
       {/* Background Image with Overlay */}
       <div 
-        className="fixed inset-0 -z-20 bg-gradient-to-br from-[#0A2463] via-[#3E92CC] to-[#0A2463] opacity-90" />
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat z-0"
+        style={{
+          backgroundImage: 'url("https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3")',
+          backgroundAttachment: 'fixed'
+        }}
+      />
 
-      {/* Animated gradient overlay */}
-      <div className="fixed inset-0 -z-10">
-        <div className="absolute inset-0">
-          <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-primary/10 to-transparent rounded-full mix-blend-overlay filter blur-3xl animate-blob" />
-          <div className="absolute top-1/2 left-1/2 w-full h-full bg-gradient-to-br from-secondary/10 to-transparent rounded-full mix-blend-overlay filter blur-3xl animate-blob animation-delay-2000" />
-          <div className="absolute -bottom-1/2 right-1/2 w-full h-full bg-gradient-to-br from-primary/10 to-transparent rounded-full mix-blend-overlay filter blur-3xl animate-blob animation-delay-4000" />
-        </div>
-      </div>
+      {/* White overlay with blur */}
+      <div className="fixed inset-0 bg-white/58 backdrop-blur-[2px] z-10" />
 
       {/* Content */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mx-[100px] py-[100px]"
+        className="relative z-20 mx-[100px] py-[100px]"
       >
         {/* Main Card Container */}
         <div className="rounded-xl overflow-hidden relative">
-          {/* Container Background with Gradient */}
-          <div className="absolute inset-0 bg-gradient-to-br from-[#0A2463]/20 via-[#3E92CC]/20 to-[#0A2463]/20 backdrop-blur-md" />
+          {/* Container Background with Blur */}
+          <div className="absolute inset-0 bg-white/58 backdrop-blur-md" />
 
           <div className="relative p-6">
             <h1 className="text-2xl font-semibold text-gray-800 mb-8">Quick Access</h1>
