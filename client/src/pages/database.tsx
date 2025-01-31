@@ -112,14 +112,27 @@ export default function DatabaseManagement() {
 
   return (
     <div className="min-h-screen bg-cover bg-center relative">
+      <div 
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat z-0"
+        style={{
+          backgroundImage: 'url("https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3")',
+          backgroundAttachment: 'fixed'
+        }}
+      />
       <div className="fixed inset-0 bg-white/58 backdrop-blur-[2px] z-10" />
 
       <div className="relative z-20 p-6 md:p-[100px]">
         <Card className="shadow-2xl bg-white/58 backdrop-blur-md">
           <div className="p-6">
             <div className="flex justify-between items-center mb-6">
-              <h1 className="text-2xl font-semibold">Component Library</h1>
+              <h1 className="text-3xl font-bold text-gray-800 bg-white/50 px-4 py-2 rounded-lg shadow-sm">Component Library</h1>
               <div className="flex gap-3">
+                <Button
+                  onClick={() => setLocation('/dashboard')}
+                  className="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700"
+                >
+                  Dashboard
+                </Button>
                 <Button
                   onClick={() => addMutation.mutate({
                     name: "New Component",
