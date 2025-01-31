@@ -1,3 +1,4 @@
+
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
@@ -185,9 +186,27 @@ export function registerRoutes(app: Express): Server {
       });
 
       const reportContent = completion.choices[0].message.content;
-
+      
       // Store the generated report
       const [report] = await db.insert(documents).values({
+        name: `Reserve Study Report - ${new Date().toLocaleDateString()}`,
+        type: 'report',
+        url: '#', // URL would be generated after storing the document
+        userId: req.user.id
+      }).returning();
+
+      res.json({ 
+        message: "Report generated successfully",
+        reportId: report.id
+      });
+    } catch (error: any) {
+      console.error('Report Generation Error:', error);
+      res.status(500).json({ 
+        error: "Failed to generate report",
+        details: error.message 
+      });
+    }
+  });
 
   // Components API endpoints
   app.get("/api/components", async (req, res) => {
@@ -251,25 +270,6 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-        name: `Reserve Study Report - ${new Date().toLocaleDateString()}`,
-        type: 'report',
-        url: '#', // URL would be generated after storing the document
-        userId: req.user.id
-      }).returning();
-
-      res.json({ 
-        message: "Report generated successfully",
-        reportId: report.id
-      });
-    } catch (error: any) {
-      console.error('Report Generation Error:', error);
-      res.status(500).json({ 
-        error: "Failed to generate report",
-        details: error.message 
-      });
-    }
-  });
-
   // Existing routes...
   app.get("/api/scenarios", async (req, res) => {
     if (!req.isAuthenticated()) {
@@ -324,8 +324,7 @@ export function registerRoutes(app: Express): Server {
     res.json(document[0]);
   });
 
-
-  // New Annotation Routes
+  // Annotation Routes
   app.post("/api/documents/:documentId/annotations", async (req, res) => {
     if (!req.isAuthenticated()) {
       return res.status(401).send("Not authenticated");
