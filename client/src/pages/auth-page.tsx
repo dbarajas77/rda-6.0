@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useUser } from "@/hooks/use-user";
+import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -13,28 +13,26 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye, EyeOff, Terminal } from "lucide-react";
 
-// Define a schema for login/register
+// Define schemas for login/register
 const loginSchema = z.object({
-  username: z.string().min(3, "Username must be at least 3 characters"),
+  email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 const registerSchema = loginSchema.extend({
-  email: z.string().email("Invalid email address"),
   fullName: z.string().min(2, "Full name must be at least 2 characters"),
 });
 
 // Development credentials
 const DEV_CREDENTIALS = {
-  username: "dev_user",
-  password: "dev_password",
   email: "dev@example.com",
+  password: "dev_password",
   fullName: "Development User"
 };
 
 export default function AuthPage() {
   const [, setLocation] = useLocation();
-  const { login, register: registerUser, user } = useUser();
+  const { user, signIn, signUp, error } = useAuth();
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [showDevPanel, setShowDevPanel] = useState(false);
@@ -43,9 +41,8 @@ export default function AuthPage() {
   const form = useForm({
     resolver: zodResolver(activeTab === "login" ? loginSchema : registerSchema),
     defaultValues: {
-      username: "",
-      password: "",
       email: "",
+      password: "",
       fullName: "",
     },
   });
@@ -62,15 +59,10 @@ export default function AuthPage() {
       const isLogin = activeTab === "login";
       console.log("Submitting form:", { isLogin, values });
 
-      const result = isLogin 
-        ? await login({
-            username: values.username,
-            password: values.password,
-          })
-        : await registerUser(values);
-
-      if (!result.ok) {
-        throw new Error(result.message);
+      if (isLogin) {
+        await signIn(values.email, values.password);
+      } else {
+        await signUp(values.email, values.password, values.fullName);
       }
 
       toast({
@@ -91,9 +83,8 @@ export default function AuthPage() {
   // Reset form when switching tabs
   useEffect(() => {
     form.reset({
-      username: "",
-      password: "",
       email: "",
+      password: "",
       fullName: "",
     });
   }, [activeTab]);
@@ -102,7 +93,7 @@ export default function AuthPage() {
     setActiveTab(isLogin ? "login" : "register");
     const values = isLogin 
       ? {
-          username: DEV_CREDENTIALS.username,
+          email: DEV_CREDENTIALS.email,
           password: DEV_CREDENTIALS.password,
         }
       : DEV_CREDENTIALS;
@@ -135,9 +126,8 @@ export default function AuthPage() {
               </CardHeader>
               <CardContent className="space-y-2 text-sm">
                 <div>
-                  <p><strong>Username:</strong> {DEV_CREDENTIALS.username}</p>
-                  <p><strong>Password:</strong> {DEV_CREDENTIALS.password}</p>
                   <p><strong>Email:</strong> {DEV_CREDENTIALS.email}</p>
+                  <p><strong>Password:</strong> {DEV_CREDENTIALS.password}</p>
                 </div>
                 <div className="flex gap-2">
                   <Button size="sm" onClick={() => fillDevCredentials(true)}>
@@ -176,14 +166,15 @@ export default function AuthPage() {
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                   <FormField
                     control={form.control}
-                    name="username"
+                    name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Username</FormLabel>
+                        <FormLabel>Email</FormLabel>
                         <FormControl>
                           <Input 
-                            placeholder={activeTab === "login" ? "Enter your username" : "Choose a username"} 
-                            {...field} 
+                            type="email"
+                            placeholder="Enter your email"
+                            {...field}
                           />
                         </FormControl>
                         <FormMessage />
@@ -192,41 +183,22 @@ export default function AuthPage() {
                   />
 
                   {activeTab === "register" && (
-                    <>
-                      <FormField
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Email</FormLabel>
-                            <FormControl>
-                              <Input 
-                                type="email" 
-                                placeholder="Enter your email" 
-                                {...field} 
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="fullName"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Full Name</FormLabel>
-                            <FormControl>
-                              <Input 
-                                placeholder="Enter your full name" 
-                                {...field} 
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </>
+                    <FormField
+                      control={form.control}
+                      name="fullName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Full Name</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="Enter your full name"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   )}
 
                   <FormField
@@ -238,9 +210,9 @@ export default function AuthPage() {
                         <FormControl>
                           <div className="relative">
                             <Input 
-                              type={showPassword ? "text" : "password"} 
+                              type={showPassword ? "text" : "password"}
                               placeholder={activeTab === "login" ? "Enter your password" : "Choose a password"}
-                              {...field} 
+                              {...field}
                             />
                             <Button
                               type="button"
@@ -261,6 +233,7 @@ export default function AuthPage() {
                       </FormItem>
                     )}
                   />
+
                   <Button type="submit" className="w-full">
                     {activeTab === "login" ? "Sign In" : "Create Account"}
                   </Button>
