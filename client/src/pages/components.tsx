@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -84,46 +83,22 @@ export default function Components() {
         <Card className="shadow-2xl bg-white/58 backdrop-blur-md">
           <div className="p-6">
             <div className="flex justify-between items-center mb-6">
-              <h1 className="text-2xl font-semibold">Component Library</h1>
+              <h1 className="text-3xl font-bold text-gray-800 bg-white/50 px-4 py-2 rounded-lg shadow-sm">Component Library</h1>
               <div className="flex gap-3">
                 <Button
                   onClick={() => setLocation('/dashboard')}
-                  className="bg-gradient-to-r from-blue-500 to-blue-600"
+                  className="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700"
                 >
                   Dashboard
                 </Button>
                 <Button
                   onClick={() => setShowDialog(true)}
-                  className="bg-gradient-to-r from-green-500 to-green-600"
+                  className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Add Component
                 </Button>
               </div>
-            </div>
-
-            <div className="flex flex-col md:flex-row gap-4 mb-6">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                <Input
-                  placeholder="Search components..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="w-full md:w-[200px]">
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((category) => (
-                    <SelectItem key={category} value={category.toLowerCase()}>
-                      {category}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -133,16 +108,21 @@ export default function Components() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                 >
-                  <Card className="h-[320px] group relative overflow-hidden hover:shadow-lg transition-all duration-300">
+                  <Card 
+                    className="h-[320px] group relative overflow-hidden hover:shadow-lg transition-all duration-300"
+                    variant="glass"
+                    hover={true}
+                  >
                     <div className="aspect-square relative">
                       <img
                         src={`https://source.unsplash.com/random/400x400/?${component.category}`}
                         alt={component.name}
-                        className="object-cover w-full h-full"
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        loading="lazy"
                       />
                     </div>
-                    <CardContent className="p-4">
-                      <h3 className="font-medium text-lg mb-1">{component.name}</h3>
+                    <CardContent className="p-4 bg-white/80 backdrop-blur-sm">
+                      <h3 className="font-medium text-lg mb-2 line-clamp-1">{component.name}</h3>
                       <p className="text-sm text-muted-foreground">Category: {component.category}</p>
                       <p className="text-sm text-muted-foreground">ID: {component.id}</p>
                     </CardContent>
@@ -160,7 +140,7 @@ export default function Components() {
             <DialogTitle>Add New Component</DialogTitle>
             <DialogDescription>Enter the details for the new component</DialogDescription>
           </DialogHeader>
-          
+
           <div className="grid grid-cols-2 gap-4">
             <Input 
               placeholder="Component Name"
@@ -182,7 +162,7 @@ export default function Components() {
                 ))}
               </SelectContent>
             </Select>
-            
+
             <Input 
               type="date"
               placeholder="Placed in Service"
@@ -195,11 +175,12 @@ export default function Components() {
               value={newComponent.usefulLife || ''}
               onChange={(e) => setNewComponent({...newComponent, usefulLife: Number(e.target.value)})}
             />
-            
+
             <Textarea
               placeholder="Comments"
               value={newComponent.comments || ''}
               onChange={(e) => setNewComponent({...newComponent, comments: e.target.value})}
+              className="col-span-2"
             />
           </div>
 
