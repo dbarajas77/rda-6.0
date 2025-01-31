@@ -19,31 +19,11 @@ function Router() {
     <Switch>
       <Route path="/" component={LandingPage} />
       <Route path="/auth" component={AuthPage} />
-      <ProtectedRoute path="/dashboard" component={() => (
-        <Layout>
-          <Dashboard />
-        </Layout>
-      )} />
-      <ProtectedRoute path="/documents" component={() => (
-        <Layout>
-          <DocumentCenter />
-        </Layout>
-      )} />
-      <ProtectedRoute path="/photos" component={() => (
-        <Layout>
-          <CommunityPhotos />
-        </Layout>
-      )} />
-      <ProtectedRoute path="/components" component={() => (
-        <Layout>
-          <Components />
-        </Layout>
-      )} />
-      <ProtectedRoute path="/database" component={() => (
-        <Layout>
-          <DatabaseManagement />
-        </Layout>
-      )} />
+      <ProtectedRoute path="/dashboard" component={Dashboard} />
+      <ProtectedRoute path="/documents" component={DocumentCenter} />
+      <ProtectedRoute path="/photos" component={CommunityPhotos} />
+      <ProtectedRoute path="/components" component={Components} />
+      <ProtectedRoute path="/database" component={DatabaseManagement} />
       <Route component={NotFound} />
     </Switch>
   );

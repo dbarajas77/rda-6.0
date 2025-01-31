@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { User, AuthError } from '@supabase/supabase-js';
 import { supabase } from './supabase';
+import { useToast } from '@/hooks/use-toast';
 
 type AuthContextType = {
   user: User | null;
@@ -17,6 +18,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<AuthError | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     // Check active sessions and sets the user
@@ -40,9 +42,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         email,
         password,
       });
-      if (error) throw error;
+      if (error) {
+        toast({
+          title: "Authentication Error",
+          description: error.message,
+          variant: "destructive",
+        });
+        throw error;
+      }
     } catch (error) {
       setError(error as AuthError);
+      throw error;
     }
   };
 
@@ -57,9 +67,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         }
       });
-      if (error) throw error;
+      if (error) {
+        toast({
+          title: "Registration Error",
+          description: error.message,
+          variant: "destructive",
+        });
+        throw error;
+      }
     } catch (error) {
       setError(error as AuthError);
+      throw error;
     }
   };
 
@@ -69,6 +87,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) throw error;
     } catch (error) {
       setError(error as AuthError);
+      throw error;
     }
   };
 
