@@ -14,25 +14,58 @@ interface Component {
   id: string;
   name: string;
   category: string;
-  group: string;
-  placedInService: string;
-  usefulLife: number;
-  quantity: number;
-  unitCost: number;
-  currentCost: number;
-  accumReserves: number;
-  percentRepl: number;
-  mntlyContrib: number;
-  oneTimeReplacement: boolean;
-  comments: string;
-  remarks: string;
+  description: string;
+  lastUpdated: string;
+  status: 'active' | 'maintenance' | 'replaced';
 }
+
+const mockComponents: Component[] = [
+  {
+    id: "COMP-001",
+    name: "Swimming Pool Equipment",
+    category: "amenities",
+    description: "Main pool filtration and heating system",
+    lastUpdated: "2024-01-15",
+    status: 'active'
+  },
+  {
+    id: "COMP-002",
+    name: "Clubhouse HVAC",
+    category: "building",
+    description: "Central air conditioning system",
+    lastUpdated: "2024-01-20",
+    status: 'maintenance'
+  },
+  {
+    id: "COMP-003",
+    name: "Tennis Court Surface",
+    category: "amenities",
+    description: "Professional grade court surface",
+    lastUpdated: "2024-01-25",
+    status: 'active'
+  },
+  {
+    id: "COMP-004",
+    name: "Perimeter Fencing",
+    category: "security",
+    description: "Wrought iron security fencing",
+    lastUpdated: "2024-01-30",
+    status: 'active'
+  },
+  {
+    id: "COMP-005",
+    name: "Roof System",
+    category: "building",
+    description: "Main building roof structure",
+    lastUpdated: "2024-02-01",
+    status: 'maintenance'
+  }
+];
 
 export default function Components() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [showDialog, setShowDialog] = useState(false);
-  const [newComponent, setNewComponent] = useState<Partial<Component>>({});
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
 
@@ -66,6 +99,7 @@ export default function Components() {
   const handleSubmit = () => {
     addMutation.mutate(newComponent);
   };
+  const [newComponent, setNewComponent] = useState<Partial<Component>>({});
 
   return (
     <div className="min-h-screen bg-cover bg-center relative">
@@ -82,7 +116,7 @@ export default function Components() {
         <Card className="shadow-2xl bg-white/58 backdrop-blur-md">
           <div className="p-6">
             <div className="flex justify-between items-center mb-6">
-              <h1 className="text-3xl font-bold text-gray-800 bg-white/50 px-4 py-2 rounded-lg shadow-sm">Component Library</h1>
+              <h1 className="text-3xl font-bold text-gray-800 bg-white/50 px-4 py-2 rounded-lg shadow-sm">Components Library</h1>
               <div className="flex gap-3">
                 <Button
                   onClick={() => setLocation('/dashboard')}
@@ -100,42 +134,51 @@ export default function Components() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {components.map((component) => (
-                <motion.div
-                  key={component.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <Card 
-                    className="group relative overflow-hidden h-[360px]"
-                    variant="glass"
-                    hover={true}
+            <div className="container mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+                {mockComponents.map((component) => (
+                  <motion.div
+                    key={component.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
                   >
-                    <div className="aspect-[4/3] w-full relative">
-                      <img
-                        src={`https://source.unsplash.com/random/800x600/?${component.category}`}
-                        alt={component.name}
-                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                        loading="lazy"
-                      />
-                    </div>
-                    <CardContent className="p-4 bg-white/80 backdrop-blur-sm">
-                      <h3 className="font-medium text-lg mb-2 line-clamp-1">{component.name}</h3>
-                      <p className="text-sm text-muted-foreground mb-2">Category: {component.category}</p>
-                      <div className="text-xs text-muted-foreground">
-                        ID: {component.id}
+                    <Card 
+                      className="group relative overflow-hidden h-[360px]"
+                      variant="glass"
+                      hover={true}
+                    >
+                      <div className="aspect-[4/3] w-full relative">
+                        <img
+                          src={`https://source.unsplash.com/featured/800x600/?${component.category}`}
+                          alt={component.name}
+                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          loading="lazy"
+                        />
+                        <div className={`absolute top-2 right-2 px-2 py-1 rounded text-xs font-medium ${
+                          component.status === 'active' ? 'bg-green-500/90 text-white' :
+                          component.status === 'maintenance' ? 'bg-yellow-500/90 text-white' :
+                          'bg-red-500/90 text-white'
+                        }`}>
+                          {component.status}
+                        </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
+                      <CardContent className="p-4 bg-white/80 backdrop-blur-sm">
+                        <h3 className="font-medium text-lg mb-2 line-clamp-1">{component.name}</h3>
+                        <p className="text-sm text-muted-foreground mb-2 line-clamp-2">{component.description}</p>
+                        <div className="flex justify-between items-center text-xs text-muted-foreground">
+                          <span>ID: {component.id}</span>
+                          <span>Updated: {new Date(component.lastUpdated).toLocaleDateString()}</span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
             </div>
           </div>
         </Card>
       </div>
-
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
