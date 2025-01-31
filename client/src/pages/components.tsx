@@ -36,7 +36,6 @@ export default function Components() {
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
 
-  // API Endpoints for CRUD operations
   const { data: components = [], isLoading } = useQuery<Component[]>({
     queryKey: ['components'],
     queryFn: async () => {
@@ -73,7 +72,7 @@ export default function Components() {
       <div 
         className="fixed inset-0 bg-cover bg-center bg-no-repeat z-0"
         style={{
-          backgroundImage: 'url("https://images.unsplash.com/photo-1560518883-ce09059eeffa")',
+          backgroundImage: 'url("https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3")',
           backgroundAttachment: 'fixed'
         }}
       />
@@ -107,15 +106,16 @@ export default function Components() {
                   key={component.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
                 >
                   <Card 
-                    className="h-[320px] group relative overflow-hidden hover:shadow-lg transition-all duration-300"
+                    className="group relative overflow-hidden h-[360px]"
                     variant="glass"
                     hover={true}
                   >
-                    <div className="aspect-square relative">
+                    <div className="aspect-[4/3] w-full relative">
                       <img
-                        src={`https://source.unsplash.com/random/400x400/?${component.category}`}
+                        src={`https://source.unsplash.com/random/800x600/?${component.category}`}
                         alt={component.name}
                         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                         loading="lazy"
@@ -123,8 +123,10 @@ export default function Components() {
                     </div>
                     <CardContent className="p-4 bg-white/80 backdrop-blur-sm">
                       <h3 className="font-medium text-lg mb-2 line-clamp-1">{component.name}</h3>
-                      <p className="text-sm text-muted-foreground">Category: {component.category}</p>
-                      <p className="text-sm text-muted-foreground">ID: {component.id}</p>
+                      <p className="text-sm text-muted-foreground mb-2">Category: {component.category}</p>
+                      <div className="text-xs text-muted-foreground">
+                        ID: {component.id}
+                      </div>
                     </CardContent>
                   </Card>
                 </motion.div>

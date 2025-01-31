@@ -10,7 +10,8 @@ const cardVariants = cva(
         default: "bg-white/90 shadow-lg hover:shadow-xl transition-all duration-300",
         dashboard: "bg-white/58 backdrop-blur-md shadow-2xl hover:bg-white/70 transition-all duration-300 border-blue-200",
         minimal: "border-none shadow-none",
-        glass: "bg-white/40 backdrop-blur-sm hover:bg-white/50 transition-all duration-300"
+        glass: "bg-white/40 backdrop-blur-sm hover:bg-white/50 transition-all duration-300",
+        quick: "h-full bg-white/40 hover:bg-white/50 transition-all duration-300 shadow-lg hover:shadow-xl backdrop-blur-sm cursor-pointer"
       },
       hover: {
         true: "hover:scale-102 transition-transform duration-200",
