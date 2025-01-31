@@ -8,11 +8,12 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useLocation } from "wouter";
-import { 
-  FileText, Upload, Filter, Search, 
-  FileIcon, Book, CheckSquare, Users, 
+import {
+  FileText, Upload, Filter, Search,
+  FileIcon, Book, CheckSquare, Users,
   File, Receipt, Download, X, Share2
 } from "lucide-react";
+import AnnotationLayer from "@/components/document/annotation-layer";
 
 // Document category definitions with colors
 const categories = [
@@ -136,7 +137,7 @@ export default function DocumentCenter() {
 
   return (
     <div className="min-h-screen bg-cover bg-center relative">
-      <div 
+      <div
         className="fixed inset-0 bg-cover bg-center bg-no-repeat z-0"
         style={{
           backgroundImage: 'url("https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3")',
@@ -150,7 +151,7 @@ export default function DocumentCenter() {
             <div className="flex justify-between items-center mb-6">
               <h1 className="text-2xl font-semibold">Document Management</h1>
               <div className="flex gap-3">
-                <Button 
+                <Button
                   onClick={() => setLocation('/dashboard')}
                   className="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl"
                 >
@@ -215,7 +216,7 @@ export default function DocumentCenter() {
                       animate={{ opacity: 1, y: 0 }}
                       className="group relative"
                     >
-                      <Card 
+                      <Card
                         className={`p-6 cursor-pointer transition-all duration-300 shadow-lg hover:shadow-2xl transform hover:-translate-y-1
                           ${selectedDocuments.has(doc.id) ? 'ring-2 ring-primary' : ''}`}
                         onClick={() => {
@@ -224,7 +225,7 @@ export default function DocumentCenter() {
                         }}
                       >
                         {/* Checkbox */}
-                        <div 
+                        <div
                           className="absolute top-2 right-2 z-10"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -276,11 +277,14 @@ export default function DocumentCenter() {
           </DialogHeader>
           <div className="flex-1 h-full">
             {selectedDocument?.url ? (
-              <iframe
-                src={selectedDocument.url}
-                className="w-full h-full rounded-lg border"
-                title={selectedDocument.name}
-              />
+              <div className="relative h-full">
+                <iframe
+                  src={selectedDocument.url}
+                  className="w-full h-full rounded-lg border"
+                  title={selectedDocument.name}
+                />
+                <AnnotationLayer documentId={parseInt(selectedDocument.id)} />
+              </div>
             ) : (
               <div className="w-full h-full flex items-center justify-center text-muted-foreground">
                 Preview not available

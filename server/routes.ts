@@ -2,8 +2,8 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import { db } from "@db";
-import { scenarios, documents } from "@db/schema";
-import { eq } from "drizzle-orm";
+import { scenarios, documents, annotations, annotationReplies } from "@db/schema";
+import { eq, and } from "drizzle-orm";
 import OpenAI from "openai";
 
 const openai = new OpenAI({
@@ -234,7 +234,7 @@ export function registerRoutes(app: Express): Server {
     res.json(scenario[0]);
   });
 
-  // Documents API (Original, kept for completeness)
+  // Documents API (Original)
   app.get("/api/documents", async (req, res) => {
     if (!req.isAuthenticated()) {
       return res.status(401).send("Not authenticated");
@@ -259,6 +259,112 @@ export function registerRoutes(app: Express): Server {
     }).returning();
 
     res.json(document[0]);
+  });
+
+
+  // New Annotation Routes
+  app.post("/api/documents/:documentId/annotations", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).send("Not authenticated");
+    }
+
+    try {
+      const [annotation] = await db.insert(annotations).values({
+        documentId: parseInt(req.params.documentId),
+        userId: req.user.id,
+        content: req.body.content,
+        position: req.body.position,
+        type: req.body.type,
+        metadata: req.body.metadata
+      }).returning();
+
+      res.json(annotation);
+    } catch (error: any) {
+      console.error('Annotation Creation Error:', error);
+      res.status(500).json({ 
+        error: "Failed to create annotation",
+        details: error.message 
+      });
+    }
+  });
+
+  app.get("/api/documents/:documentId/annotations", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).send("Not authenticated");
+    }
+
+    try {
+      const documentAnnotations = await db.query.annotations.findMany({
+        where: eq(annotations.documentId, parseInt(req.params.documentId)),
+        with: {
+          user: true,
+          replies: {
+            with: {
+              user: true
+            },
+            orderBy: (replies, { asc }) => [asc(replies.createdAt)]
+          }
+        },
+        orderBy: (annotations, { desc }) => [desc(annotations.createdAt)]
+      });
+
+      res.json(documentAnnotations);
+    } catch (error: any) {
+      console.error('Fetch Annotations Error:', error);
+      res.status(500).json({ 
+        error: "Failed to fetch annotations",
+        details: error.message 
+      });
+    }
+  });
+
+  app.post("/api/annotations/:annotationId/replies", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).send("Not authenticated");
+    }
+
+    try {
+      const [reply] = await db.insert(annotationReplies).values({
+        annotationId: parseInt(req.params.annotationId),
+        userId: req.user.id,
+        content: req.body.content
+      }).returning();
+
+      res.json(reply);
+    } catch (error: any) {
+      console.error('Reply Creation Error:', error);
+      res.status(500).json({ 
+        error: "Failed to create reply",
+        details: error.message 
+      });
+    }
+  });
+
+  app.delete("/api/annotations/:annotationId", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).send("Not authenticated");
+    }
+
+    try {
+      // First delete all replies
+      await db.delete(annotationReplies)
+        .where(eq(annotationReplies.annotationId, parseInt(req.params.annotationId)));
+
+      // Then delete the annotation
+      await db.delete(annotations)
+        .where(and(
+          eq(annotations.id, parseInt(req.params.annotationId)),
+          eq(annotations.userId, req.user.id)
+        ));
+
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error('Annotation Deletion Error:', error);
+      res.status(500).json({ 
+        error: "Failed to delete annotation",
+        details: error.message 
+      });
+    }
   });
 
   const httpServer = createServer(app);
