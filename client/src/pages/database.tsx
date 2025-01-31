@@ -51,7 +51,7 @@ export default function DatabaseManagement() {
 
       {/* Content */}
       <div className="relative z-20 p-[100px]">
-        <Card className="shadow-2xl bg-white/58 backdrop-blur-md">
+        <Card variant="dashboard">
           <div className="p-6">
             <div className="flex justify-between items-center mb-6">
               <h1 className="text-2xl font-semibold">Database Management</h1>
@@ -94,10 +94,8 @@ export default function DatabaseManagement() {
                   whileTap={{ scale: 0.98 }}
                 >
                   <Card 
-                    className="h-full bg-blue-50/40 hover:shadow-blue-200/50 
-                              transition-all duration-300 cursor-pointer 
-                              border-blue-200 shadow-lg hover:shadow-xl
-                              backdrop-blur-sm hover:bg-white/50"
+                    variant="glass"
+                    hover
                     onClick={() => setLocation('/components')}
                   >
                     <CardContent className="p-6">
