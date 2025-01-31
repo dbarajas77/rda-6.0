@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
@@ -29,6 +28,20 @@ interface Component {
   comments?: string;
   remarks?: string;
 }
+
+// Update the getRandomImage function to use more reliable image categories
+const getRandomImage = (category: string) => {
+  const categories: Record<string, string> = {
+    amenities: "community+pool",
+    roofing: "modern+roof",
+    building: "modern+building+facade",
+    landscape: "garden+landscape"
+  };
+  const defaultQuery = "building+exterior";
+  const searchQuery = categories[category] || defaultQuery;
+  // Add a specific size to maintain consistency
+  return `https://source.unsplash.com/featured/800x600/?${searchQuery}`;
+};
 
 export default function DatabaseManagement() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -111,17 +124,6 @@ export default function DatabaseManagement() {
     }
   ];
 
-  const getRandomImage = (category: string) => {
-    const categories: Record<string, string> = {
-      amenities: "swimming+pool+equipment",
-      roofing: "house+roof",
-      building: "building+exterior",
-      landscape: "landscape+design"
-    };
-    return `https://source.unsplash.com/featured/800x600/?${categories[category] || category}`;
-  };
-
-  
 
   return (
     <div className="min-h-screen bg-cover bg-center relative">
@@ -156,27 +158,33 @@ export default function DatabaseManagement() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
               {mockComponents.map((component) => (
                 <motion.div
                   key={component.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
                 >
-                  <Card className="group relative overflow-hidden hover:shadow-lg transition-all duration-300">
-                    <div className="relative aspect-[4/3]">
+                  <Card className="group relative overflow-hidden hover:shadow-lg transition-all duration-300 h-[360px]">
+                    <div className="aspect-[4/3] w-full relative">
                       <img 
                         src={getRandomImage(component.category)}
                         alt={component.name}
                         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        loading="lazy"
                       />
                       <div className="absolute top-2 left-2 bg-white/90 px-2 py-1 rounded text-xs font-medium text-gray-600">
                         {component.id}
                       </div>
                     </div>
-                    <div className="p-4">
-                      <h3 className="font-medium text-lg mb-1">{component.name}</h3>
-                      <p className="text-sm text-gray-600 capitalize">{component.category}</p>
+                    <div className="p-4 bg-white/80 backdrop-blur-sm">
+                      <h3 className="font-medium text-lg mb-2 line-clamp-1">{component.name}</h3>
+                      <p className="text-sm text-gray-600 capitalize mb-2">{component.category}</p>
+                      <div className="flex flex-col gap-1 text-sm text-gray-500">
+                        <p>Useful Life: {component.usefulLife} years</p>
+                        <p>Current Cost: ${component.currentCost.toLocaleString()}</p>
+                      </div>
                     </div>
                   </Card>
                 </motion.div>
@@ -198,7 +206,6 @@ export default function DatabaseManagement() {
           </DialogHeader>
 
           <div className="grid grid-cols-12 gap-6 py-4">
-            {/* Left Column - Image Uploads */}
             <div className="col-span-4 space-y-4">
               {[1, 2, 3].map((index) => (
                 <div key={index} className="border-2 border-dashed rounded-lg p-4 text-center hover:border-blue-400 transition-colors">
@@ -208,9 +215,7 @@ export default function DatabaseManagement() {
               ))}
             </div>
 
-            {/* Right Column - Form Fields */}
             <div className="col-span-8 space-y-6">
-              {/* First Row */}
               <div className="grid grid-cols-3 gap-4">
                 <Input 
                   placeholder="Asset ID"
@@ -236,7 +241,6 @@ export default function DatabaseManagement() {
                 </Select>
               </div>
 
-              {/* Second Row */}
               <div className="grid grid-cols-3 gap-4">
                 <Input 
                   type="date"
@@ -257,7 +261,6 @@ export default function DatabaseManagement() {
                 />
               </div>
 
-              {/* Third Row */}
               <div className="grid grid-cols-3 gap-4">
                 <Input 
                   type="number"
@@ -279,7 +282,6 @@ export default function DatabaseManagement() {
                 />
               </div>
 
-              {/* Fourth Row */}
               <div className="grid grid-cols-3 gap-4">
                 <Input 
                   type="number"
@@ -301,7 +303,6 @@ export default function DatabaseManagement() {
                 />
               </div>
 
-              {/* Additional Fields */}
               <div className="space-y-4">
                 <div className="flex items-center space-x-2">
                   <Checkbox 
@@ -313,14 +314,12 @@ export default function DatabaseManagement() {
                     One Time Replacement
                   </label>
                 </div>
-                
                 <Textarea
                   placeholder="Comments"
                   value={newComponent.comments || ''}
                   onChange={(e) => setNewComponent({...newComponent, comments: e.target.value})}
                   className="min-h-[80px]"
                 />
-                
                 <Textarea
                   placeholder="Remarks"
                   value={newComponent.remarks || ''}
