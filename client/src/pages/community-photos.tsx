@@ -136,13 +136,13 @@ export default function CommunityPhotos() {
       />
       <div className="fixed inset-0 bg-white/58 backdrop-blur-[2px] z-10" />
       <div className="relative z-20 p-[100px]">
-        <Card className="shadow-xl backdrop-blur-sm bg-white/95">
+        <Card className="shadow-2xl bg-white/58 backdrop-blur-md">
           <div className="p-6">
             <div className="flex justify-between items-center mb-6">
               <h1 className="text-2xl font-semibold">Community Photos</h1>
               <Button 
                 onClick={() => setShowUploadDialog(true)}
-                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition-all duration-300"
+                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Add Photo
@@ -157,13 +157,13 @@ export default function CommunityPhotos() {
                     placeholder="Search photos..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
+                    className="pl-10 shadow-lg focus:shadow-xl transition-shadow duration-300"
                   />
                 </div>
               </div>
 
               <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="w-full">
-                <TabsList className="w-full justify-start">
+                <TabsList className="w-full justify-start shadow-md">
                   <TabsTrigger value="all">All Photos</TabsTrigger>
                   <TabsTrigger value="general">General</TabsTrigger>
                   <TabsTrigger value="maintenance">Maintenance</TabsTrigger>
@@ -183,7 +183,7 @@ export default function CommunityPhotos() {
                   className="group"
                 >
                   <Card 
-                    className={`p-3 cursor-pointer transition-all duration-300 hover:shadow-xl
+                    className={`p-3 cursor-pointer transition-all duration-300 shadow-lg hover:shadow-2xl transform hover:-translate-y-1
                       ${photo.category === 'issue' ? 'hover:border-red-400' :
                         photo.category === 'maintenance' ? 'hover:border-yellow-400' :
                         'hover:border-blue-400'}`}
@@ -225,7 +225,7 @@ export default function CommunityPhotos() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="border-2 border-dashed border-blue-200 rounded-lg p-8 text-center hover:border-blue-400 transition-colors">
+            <div className="border-2 border-dashed border-blue-200 rounded-lg p-8 text-center hover:border-blue-400 transition-colors shadow-md hover:shadow-xl">
               <Input
                 type="file"
                 accept="image/*"
@@ -241,9 +241,9 @@ export default function CommunityPhotos() {
             </div>
             <Input 
               placeholder="Enter photo title"
-              className="border-blue-200 focus:border-blue-400"
+              className="border-blue-200 focus:border-blue-400 shadow-md focus:shadow-xl"
             />
-            <select className="w-full p-2 rounded-md border border-blue-200 focus:border-blue-400">
+            <select className="w-full p-2 rounded-md border border-blue-200 focus:border-blue-400 shadow-md focus:shadow-xl">
               <option value="general">General</option>
               <option value="maintenance">Maintenance</option>
               <option value="issue">Issue</option>
@@ -257,7 +257,7 @@ export default function CommunityPhotos() {
             </Button>
             <Button 
               onClick={() => setShowUploadDialog(false)}
-              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
+              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-lg hover:shadow-xl"
             >
               Upload
             </Button>
@@ -269,7 +269,7 @@ export default function CommunityPhotos() {
         <DialogContent className="max-w-2xl">
           {selectedPhoto && (
             <div className="space-y-6">
-              <div className="aspect-video relative rounded-lg overflow-hidden">
+              <div className="aspect-video relative rounded-lg overflow-hidden shadow-xl">
                 <img
                   src={selectedPhoto.url}
                   alt={selectedPhoto.title}
@@ -285,7 +285,7 @@ export default function CommunityPhotos() {
                 <h3 className="font-medium text-lg">Notes</h3>
                 <div className="max-h-[200px] overflow-y-auto space-y-3 pr-2">
                   {selectedPhoto.notes?.map((note, index) => (
-                    <div key={index} className="bg-muted p-3 rounded-md text-sm">
+                    <div key={index} className="bg-muted p-3 rounded-md text-sm shadow-sm">
                       {note}
                     </div>
                   ))}
@@ -296,8 +296,9 @@ export default function CommunityPhotos() {
                     value={newNote}
                     onChange={(e) => setNewNote(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleAddNote()}
+                    className="shadow-md focus:shadow-xl"
                   />
-                  <Button onClick={handleAddNote}>Add Note</Button>
+                  <Button onClick={handleAddNote} className="shadow-lg hover:shadow-xl">Add Note</Button>
                 </div>
               </div>
             </div>
