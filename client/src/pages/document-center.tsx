@@ -4,22 +4,19 @@ import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   FileText, Upload, Filter, Search, 
   FileIcon, Book, CheckSquare, Users, 
-  File, Receipt, Download 
+  File, Receipt, Download, Printer 
 } from "lucide-react";
 
-// Document category definitions
+// Document category definitions with colors
 const categories = [
-  { id: 'insurance', label: 'Insurance', icon: CheckSquare },
-  { id: 'bylaws', label: 'HOA Bylaws', icon: Book },
-  { id: 'reports', label: 'Generated Reports', icon: FileText },
-  { id: 'meetings', label: 'Meeting Minutes', icon: Users },
-  { id: 'contracts', label: 'Vendor Contracts', icon: File },
-  { id: 'invoices', label: 'Invoices', icon: Receipt }
+  { id: 'bylaws', label: 'Bylaws', icon: FileIcon, color: 'text-blue-500' },
+  { id: 'minutes', label: 'Minutes', icon: Book, color: 'text-green-500' },
+  { id: 'financial', label: 'Financial', icon: Receipt, color: 'text-purple-500' },
+  { id: 'forms', label: 'Forms', icon: FileText, color: 'text-orange-500' }
 ];
 
 interface Document {
@@ -29,12 +26,13 @@ interface Document {
   category: string;
   createdAt: string;
   size: string;
+  url?: string;
 }
 
 export default function DocumentCenter() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [previewDocument, setPreviewDocument] = useState<Document | null>(null);
+  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
 
   // Fetch documents
   const { data: documents = [], isLoading } = useQuery<Document[]>({
@@ -69,8 +67,6 @@ export default function DocumentCenter() {
       });
 
       if (!response.ok) throw new Error('Upload failed');
-
-      // Refetch documents after successful upload
       window.location.reload();
     } catch (error) {
       console.error('Upload error:', error);
@@ -86,7 +82,7 @@ export default function DocumentCenter() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = previewDocument?.name || 'document';
+      a.download = selectedDocument?.name || 'document';
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -95,42 +91,26 @@ export default function DocumentCenter() {
     }
   };
 
+  const handlePrint = () => {
+    if (selectedDocument?.url) {
+      const printWindow = window.open(selectedDocument.url, '_blank');
+      printWindow?.print();
+    }
+  };
+
   return (
-    <div className="min-h-screen relative bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Background with blue gradient */}
-      <div 
-        className="fixed inset-0 -z-20 bg-gradient-to-br from-[#0A2463] via-[#3E92CC] to-[#0A2463] opacity-90" />
-
-      {/* Animated gradient overlay */}
-      <div className="fixed inset-0 -z-10">
-        <div className="absolute inset-0">
-          <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-primary/10 to-transparent rounded-full mix-blend-overlay filter blur-3xl animate-blob" />
-          <div className="absolute top-1/2 left-1/2 w-full h-full bg-gradient-to-br from-secondary/10 to-transparent rounded-full mix-blend-overlay filter blur-3xl animate-blob animation-delay-2000" />
-          <div className="absolute -bottom-1/2 right-1/2 w-full h-full bg-gradient-to-br from-primary/10 to-transparent rounded-full mix-blend-overlay filter blur-3xl animate-blob animation-delay-4000" />
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="relative mx-[100px] py-[100px]">
-        <Card className="p-6 backdrop-blur-md bg-white/30">
+    <div className="min-h-screen bg-background">
+      <div className="flex h-screen">
+        {/* Left Panel - Document List */}
+        <div className="w-[400px] border-r p-6 overflow-hidden flex flex-col">
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-semibold">Document Center</h1>
-            <Button onClick={() => document.getElementById('fileUpload')?.click()}>
-              <Upload className="w-4 h-4 mr-2" />
-              Upload Document
-              <input
-                id="fileUpload"
-                type="file"
-                className="hidden"
-                onChange={handleFileUpload}
-              />
-            </Button>
+            <h1 className="text-2xl font-semibold">Document Management</h1>
           </div>
 
-          {/* Search and Filter Bar */}
+          {/* Search and Upload */}
           <div className="flex gap-4 mb-6">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
                 placeholder="Search documents..."
                 value={searchQuery}
@@ -138,16 +118,24 @@ export default function DocumentCenter() {
                 className="pl-10"
               />
             </div>
+            <Button onClick={() => document.getElementById('fileUpload')?.click()}>
+              <Upload className="w-4 h-4" />
+              <input
+                id="fileUpload"
+                type="file"
+                className="hidden"
+                onChange={handleFileUpload}
+              />
+            </Button>
             <Button variant="outline">
-              <Filter className="w-4 h-4 mr-2" />
-              Filter
+              <Filter className="w-4 h-4" />
             </Button>
           </div>
 
           {/* Document Categories */}
-          <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
-            <TabsList className="mb-6">
-              <TabsTrigger value="all">All Documents</TabsTrigger>
+          <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="flex-1 overflow-hidden flex flex-col">
+            <TabsList className="mb-4">
+              <TabsTrigger value="all">All</TabsTrigger>
               {categories.map(category => (
                 <TabsTrigger key={category.id} value={category.id}>
                   {category.label}
@@ -155,68 +143,91 @@ export default function DocumentCenter() {
               ))}
             </TabsList>
 
-            {/* Documents Grid */}
-            <TabsContent value={selectedCategory} className="m-0">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredDocuments.map((doc: Document) => (
-                  <motion.div
-                    key={doc.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="group"
-                  >
-                    <Card 
-                      className="p-4 cursor-pointer hover:shadow-lg transition-shadow"
-                      onClick={() => setPreviewDocument(doc)}
+            {/* Documents List */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="space-y-2">
+                {filteredDocuments.map((doc: Document) => {
+                  const category = categories.find(c => c.id === doc.category);
+                  return (
+                    <motion.div
+                      key={doc.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="group"
                     >
-                      <div className="flex items-start gap-4">
-                        <div className="p-2 rounded-lg bg-primary/10">
-                          <FileIcon className="w-6 h-6 text-primary" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-medium truncate">{doc.name}</h3>
-                          <p className="text-sm text-gray-500 truncate">{doc.description}</p>
-                          <div className="mt-2 flex items-center text-xs text-gray-500">
-                            <span>{new Date(doc.createdAt).toLocaleDateString()}</span>
-                            <span className="mx-2">•</span>
-                            <span>{doc.size}</span>
+                      <Card 
+                        className={`p-3 cursor-pointer transition-colors ${
+                          selectedDocument?.id === doc.id ? 'bg-muted' : 'hover:bg-muted/50'
+                        }`}
+                        onClick={() => setSelectedDocument(doc)}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className={`p-2 rounded-lg bg-muted ${category?.color || 'text-foreground'}`}>
+                            {category?.icon && <category.icon className="w-4 h-4" />}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-medium truncate text-sm">{doc.name}</h3>
+                            <div className="mt-1 flex items-center text-xs text-muted-foreground">
+                              <span className="truncate">{new Date(doc.createdAt).toLocaleDateString()}</span>
+                              <span className="mx-2">•</span>
+                              <span>{doc.size}</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </Card>
-                  </motion.div>
-                ))}
+                      </Card>
+                    </motion.div>
+                  );
+                })}
               </div>
-            </TabsContent>
+            </div>
           </Tabs>
-        </Card>
-      </div>
+        </div>
 
-      {/* Document Preview Dialog */}
-      <Dialog open={!!previewDocument} onOpenChange={() => setPreviewDocument(null)}>
-        <DialogContent className="max-w-4xl">
-          <DialogHeader>
-            <DialogTitle>{previewDocument?.name}</DialogTitle>
-          </DialogHeader>
-          <div className="mt-4">
-            <div className="aspect-[16/9] rounded-lg border bg-muted">
-              {/* Document preview iframe or component will go here */}
-              <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                Document Preview
+        {/* Right Panel - Document Preview */}
+        <div className="flex-1 p-6">
+          {selectedDocument ? (
+            <div className="h-full flex flex-col">
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h2 className="text-xl font-semibold">{selectedDocument.name}</h2>
+                  <p className="text-sm text-muted-foreground">
+                    Last modified {new Date(selectedDocument.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={handlePrint}>
+                    <Printer className="w-4 h-4 mr-2" />
+                    Print
+                  </Button>
+                  <Button onClick={() => selectedDocument && downloadDocument(selectedDocument.id)}>
+                    <Download className="w-4 h-4 mr-2" />
+                    Download
+                  </Button>
+                </div>
+              </div>
+
+              {/* Document Preview */}
+              <div className="flex-1 rounded-lg border bg-card">
+                {selectedDocument.url ? (
+                  <iframe
+                    src={selectedDocument.url}
+                    className="w-full h-full rounded-lg"
+                    title={selectedDocument.name}
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                    Preview not available
+                  </div>
+                )}
               </div>
             </div>
-            <div className="mt-4 flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setPreviewDocument(null)}>
-                Close
-              </Button>
-              <Button onClick={() => previewDocument && downloadDocument(previewDocument.id)}>
-                <Download className="w-4 h-4 mr-2" />
-                Download
-              </Button>
+          ) : (
+            <div className="h-full flex items-center justify-center text-muted-foreground">
+              Select a document to preview
             </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
