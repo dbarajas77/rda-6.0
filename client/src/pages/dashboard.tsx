@@ -8,7 +8,7 @@ export default function Dashboard() {
       <div 
         className="fixed inset-0 bg-cover bg-center bg-no-repeat z-0"
         style={{
-          backgroundImage: 'url("https://images.unsplash.com/photo-1580587771525-78b9dba3b914?ixlib=rb-4.0.3")',
+          backgroundImage: 'url("/attached_assets/hoa house.webp")',
           backgroundAttachment: 'fixed'
         }}
       />
