@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Search, Upload, Plus, MessageCircle, Filter } from "lucide-react";
+import { Search, Upload, Plus, MessageCircle } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLocation } from "wouter";
 
@@ -137,11 +137,11 @@ export default function CommunityPhotos() {
         }}
       />
       <div className="fixed inset-0 bg-white/58 backdrop-blur-[2px] z-10" />
-      <div className="relative z-20 p-[100px]">
+      <div className="relative z-20 p-6 md:p-[100px]">
         <Card className="shadow-2xl bg-white/58 backdrop-blur-md">
           <div className="p-6">
             <div className="flex justify-between items-center mb-6">
-              <h1 className="text-2xl font-semibold">Community Photos</h1>
+              <h1 className="text-3xl font-bold text-gray-800 bg-white/50 px-4 py-2 rounded-lg shadow-sm">Community Photos</h1>
               <div className="flex gap-3">
                 <Button 
                   onClick={() => setLocation('/dashboard')}
@@ -184,39 +184,39 @@ export default function CommunityPhotos() {
               </Tabs>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredPhotos.map((photo) => (
                 <motion.div
                   key={photo.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
                   className="group"
                 >
                   <Card 
-                    className={`p-3 cursor-pointer transition-all duration-300 shadow-lg hover:shadow-2xl transform hover:-translate-y-1
-                      ${photo.category === 'issue' ? 'hover:border-red-400' :
-                        photo.category === 'maintenance' ? 'hover:border-yellow-400' :
-                        'hover:border-blue-400'}`}
+                    className="h-[360px] cursor-pointer transition-all duration-300 shadow-lg hover:shadow-2xl transform hover:-translate-y-1 overflow-hidden"
                     onClick={() => {
                       setSelectedPhoto(photo);
                       setShowEnlargedView(true);
                     }}
                   >
-                    <div className="flex items-start gap-3">
-                      <div className="relative w-full aspect-[4/3] overflow-hidden rounded-lg">
-                        <img
-                          src={photo.url}
-                          alt={photo.title}
-                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                        />
-                        <div className="absolute top-2 right-2 bg-white/90 rounded-full p-1 shadow-lg">
-                          <MessageCircle className={`h-5 w-5 ${photo.notes?.length ? 'text-green-500' : 'text-gray-400'}`} />
-                        </div>
+                    <div className="aspect-[4/3] w-full relative overflow-hidden">
+                      <img
+                        src={photo.url}
+                        alt={photo.title}
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        loading="lazy"
+                      />
+                      <div className="absolute top-2 right-2 bg-white/90 rounded-full p-1 shadow-lg">
+                        <MessageCircle className={`h-5 w-5 ${photo.notes?.length ? 'text-green-500' : 'text-gray-400'}`} />
                       </div>
                     </div>
-                    <div className="flex flex-col items-center text-center space-y-2 mt-3">
-                      <h3 className="font-medium truncate text-sm">{photo.title}</h3>
-                      <p className="text-xs text-muted-foreground capitalize">{photo.category}</p>
+                    <div className="p-4 bg-white/80 backdrop-blur-sm">
+                      <h3 className="font-medium text-lg mb-2 line-clamp-1">{photo.title}</h3>
+                      <p className="text-sm text-muted-foreground capitalize mb-2">{photo.category}</p>
+                      <div className="text-xs text-muted-foreground">
+                        Added: {new Date(photo.createdAt).toLocaleDateString()}
+                      </div>
                     </div>
                   </Card>
                 </motion.div>
