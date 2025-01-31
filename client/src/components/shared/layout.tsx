@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import UserNav from "./user-nav";
+import { useUser } from "@/hooks/use-user";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { user } = useUser();
