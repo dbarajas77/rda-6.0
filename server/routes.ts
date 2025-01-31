@@ -1,4 +1,3 @@
-
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
@@ -6,6 +5,7 @@ import { db } from "@db";
 import { scenarios, documents, annotations, annotationReplies } from "@db/schema";
 import { eq, and } from "drizzle-orm";
 import OpenAI from "openai";
+import chatRouter from "./routes/chat";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -69,6 +69,9 @@ const mockDocuments = [
 
 export function registerRoutes(app: Express): Server {
   setupAuth(app);
+
+  // Register chat routes
+  app.use("/api", chatRouter);
 
   // AI Analysis endpoint
   app.post("/api/analysis/financial", async (req, res) => {
