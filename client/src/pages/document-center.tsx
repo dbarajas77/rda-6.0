@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -66,7 +66,7 @@ export default function DocumentCenter() {
   const filteredDocuments = documents.filter((doc: Document) => {
     const matchesCategory = selectedCategory === "all" || doc.category === selectedCategory;
     const matchesSearch = doc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                       doc.description?.toLowerCase().includes(searchQuery.toLowerCase());
+                         doc.description?.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
@@ -210,15 +210,52 @@ export default function DocumentCenter() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {filteredDocuments.map((doc: Document) => {
                   const category = categories.find(c => c.id === doc.category);
+                  const cardColors = {
+                    bylaws: {
+                      color: "text-blue-600",
+                      bgColor: "bg-blue-50/40",
+                      borderColor: "border-blue-200",
+                      shadowColor: "shadow-blue-200/50"
+                    },
+                    minutes: {
+                      color: "text-green-600",
+                      bgColor: "bg-green-50/40",
+                      borderColor: "border-green-200",
+                      shadowColor: "shadow-green-200/50"
+                    },
+                    financial: {
+                      color: "text-purple-600",
+                      bgColor: "bg-purple-50/40",
+                      borderColor: "border-purple-200",
+                      shadowColor: "shadow-purple-200/50"
+                    },
+                    forms: {
+                      color: "text-orange-600",
+                      bgColor: "bg-orange-50/40",
+                      borderColor: "border-orange-200",
+                      shadowColor: "shadow-orange-200/50"
+                    }
+                  };
+                  const colors = cardColors[doc.category as keyof typeof cardColors] || cardColors.bylaws;
+
                   return (
                     <motion.div
                       key={doc.id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: parseInt(doc.id) * 0.1 }}
+                      whileHover={{
+                        scale: 1.03,
+                        transition: { duration: 0.2 }
+                      }}
+                      whileTap={{ scale: 0.98 }}
                       className="group relative"
                     >
                       <Card
-                        className={`p-6 cursor-pointer transition-all duration-300 shadow-lg hover:shadow-2xl transform hover:-translate-y-1
+                        className={`h-full cursor-pointer transition-all duration-300
+                          ${colors.bgColor} hover:${colors.shadowColor}
+                          ${colors.borderColor} shadow-lg hover:shadow-xl
+                          backdrop-blur-sm hover:bg-white/50
                           ${selectedDocuments.has(doc.id) ? 'ring-2 ring-primary' : ''}`}
                         onClick={() => {
                           setSelectedDocument(doc);
@@ -227,7 +264,7 @@ export default function DocumentCenter() {
                       >
                         {/* Checkbox */}
                         <div
-                          className="absolute top-2 right-2 z-10"
+                          className="absolute top-4 right-4 z-10"
                           onClick={(e) => {
                             e.stopPropagation();
                             toggleDocumentSelection(doc.id);
@@ -239,22 +276,24 @@ export default function DocumentCenter() {
                           />
                         </div>
 
-                        <div className="flex flex-col items-center text-center space-y-4">
-                          <div className={`p-3 rounded-full bg-white/90 ${category?.color || 'text-foreground'}`}>
-                            {category?.icon && <category.icon className="h-6 w-6" />}
-                          </div>
-                          <div className="space-y-2">
-                            <h3 className="font-medium text-lg truncate">{doc.name}</h3>
-                            <p className="text-sm text-muted-foreground truncate">
-                              {doc.description || category?.label}
-                            </p>
-                            <div className="flex items-center justify-center text-xs text-muted-foreground space-x-2">
-                              <span>{new Date(doc.createdAt).toLocaleDateString()}</span>
-                              <span>•</span>
-                              <span>{doc.size}</span>
+                        <CardContent className="p-6">
+                          <div className="flex flex-col items-center text-center space-y-4">
+                            <div className={`p-3 rounded-full bg-white/90 ${colors.color}`}>
+                              {category?.icon && <category.icon className="h-6 w-6" />}
+                            </div>
+                            <div className="space-y-2">
+                              <h3 className="font-medium text-lg">{doc.name}</h3>
+                              <p className="text-sm text-muted-foreground">
+                                {doc.description || category?.label}
+                              </p>
+                              <div className="flex items-center justify-center text-xs text-muted-foreground space-x-2">
+                                <span>{new Date(doc.createdAt).toLocaleDateString()}</span>
+                                <span>•</span>
+                                <span>{doc.size}</span>
+                              </div>
                             </div>
                           </div>
-                        </div>
+                        </CardContent>
                       </Card>
                     </motion.div>
                   );
