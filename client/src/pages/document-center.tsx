@@ -96,9 +96,10 @@ export default function DocumentCenter() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen relative bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Background with blue gradient */}
-      <div className="fixed inset-0 -z-20 bg-gradient-to-br from-[#0A2463] via-[#3E92CC] to-[#0A2463] opacity-90" />
+      <div 
+        className="fixed inset-0 -z-20 bg-gradient-to-br from-[#0A2463] via-[#3E92CC] to-[#0A2463] opacity-90" />
 
       {/* Animated gradient overlay */}
       <div className="fixed inset-0 -z-10">
@@ -109,7 +110,7 @@ export default function DocumentCenter() {
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* Content */}
       <div className="relative mx-[100px] py-[100px]">
         <Card className="p-6 backdrop-blur-md bg-white/30">
           <div className="flex justify-between items-center mb-6">
