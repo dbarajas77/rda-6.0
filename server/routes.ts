@@ -52,7 +52,69 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  // Scenarios API
+  // Report Generation endpoint
+  app.post("/api/reports/generate", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).send("Not authenticated");
+    }
+
+    try {
+      // Get user's scenarios and documents
+      const userScenarios = await db.query.scenarios.findMany({
+        where: eq(scenarios.userId, req.user.id),
+        orderBy: (scenarios, { desc }) => [desc(scenarios.createdAt)]
+      });
+
+      // Generate comprehensive report using OpenAI
+      const reportPrompt = `Generate a comprehensive HOA Reserve Study Report using this data:
+
+      Scenarios: ${JSON.stringify(userScenarios)}
+
+      Please include:
+      1. Executive Summary
+      2. Current Reserve Status
+      3. Financial Analysis and Recommendations
+      4. Maintenance Schedule and Timeline
+      5. Risk Assessment
+      6. Funding Recommendations`;
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4",
+        messages: [
+          { 
+            role: "system", 
+            content: "You are an expert HOA reserve study analyst. Generate a detailed, professional report." 
+          },
+          { role: "user", content: reportPrompt }
+        ],
+        temperature: 0.7,
+        max_tokens: 2500
+      });
+
+      const reportContent = completion.choices[0].message.content;
+
+      // Store the generated report
+      const [report] = await db.insert(documents).values({
+        userId: req.user.id,
+        title: `Reserve Study Report - ${new Date().toLocaleDateString()}`,
+        content: reportContent,
+        type: 'report'
+      }).returning();
+
+      res.json({ 
+        message: "Report generated successfully",
+        reportId: report.id
+      });
+    } catch (error: any) {
+      console.error('Report Generation Error:', error);
+      res.status(500).json({ 
+        error: "Failed to generate report",
+        details: error.message 
+      });
+    }
+  });
+
+  // Existing routes...
   app.get("/api/scenarios", async (req, res) => {
     if (!req.isAuthenticated()) {
       return res.status(401).send("Not authenticated");

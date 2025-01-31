@@ -3,6 +3,7 @@ import QuickAccess from "@/components/dashboard/quick-access";
 import AIAssistant from "@/components/dashboard/ai-assistant";
 import AnalysisSection from "@/components/dashboard/analysis-section";
 import ScenarioSection from "@/components/dashboard/scenario-section";
+import ReportGenerator from "@/components/dashboard/report-generator";
 
 export default function Dashboard() {
   return (
@@ -31,7 +32,10 @@ export default function Dashboard() {
           <ScenarioSection />
         </div>
 
-        <AIAssistant />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <ReportGenerator />
+          <AIAssistant />
+        </div>
       </motion.div>
     </div>
   );
