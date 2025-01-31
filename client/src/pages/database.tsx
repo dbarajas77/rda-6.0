@@ -94,10 +94,11 @@ export default function DatabaseManagement() {
                   whileTap={{ scale: 0.98 }}
                 >
                   <Card 
-                    className={`h-full bg-blue-50/40 hover:shadow-blue-200/50 
+                    className="h-full bg-blue-50/40 hover:shadow-blue-200/50 
                               transition-all duration-300 cursor-pointer 
                               border-blue-200 shadow-lg hover:shadow-xl
-                              backdrop-blur-sm hover:bg-white/50`}
+                              backdrop-blur-sm hover:bg-white/50"
+                    onClick={() => setLocation('/components')}
                   >
                     <CardContent className="p-6">
                       <div className="flex flex-col items-center text-center space-y-4">
