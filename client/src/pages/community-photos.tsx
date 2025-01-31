@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Search, Upload, Plus, MessageCircle, Filter } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useLocation } from "wouter";
 
 interface Photo {
   id: string;
@@ -90,6 +91,7 @@ export default function CommunityPhotos() {
   const [newNote, setNewNote] = useState("");
   const [showEnlargedView, setShowEnlargedView] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [, setLocation] = useLocation();
 
   const { data: photos = mockPhotos, isLoading } = useQuery<Photo[]>({
     queryKey: ['community-photos'],
@@ -140,13 +142,21 @@ export default function CommunityPhotos() {
           <div className="p-6">
             <div className="flex justify-between items-center mb-6">
               <h1 className="text-2xl font-semibold">Community Photos</h1>
-              <Button 
-                onClick={() => setShowUploadDialog(true)}
-                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add Photo
-              </Button>
+              <div className="flex gap-3">
+                <Button 
+                  onClick={() => setLocation('/dashboard')}
+                  className="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+                >
+                  Dashboard
+                </Button>
+                <Button 
+                  onClick={() => setShowUploadDialog(true)}
+                  className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Photo
+                </Button>
+              </div>
             </div>
 
             <div className="flex flex-col gap-4 mb-6">
