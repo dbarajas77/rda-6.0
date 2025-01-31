@@ -58,7 +58,7 @@ export default function CommunityCarousel() {
       >
         {rowOne.map((community) => (
           <Card
-            key={`${community.id}-1`}
+            key={community.id} // Corrected key to use unique community ID
             className="flex-shrink-0 w-[200px] sm:w-[225px] h-[120px] sm:h-[150px] overflow-hidden"
           >
             <div
@@ -88,7 +88,7 @@ export default function CommunityCarousel() {
       >
         {rowTwo.map((community) => (
           <Card
-            key={`${community.id}-2`}
+            key={community.id} // Corrected key to use unique community ID
             className="flex-shrink-0 w-[200px] sm:w-[225px] h-[120px] sm:h-[150px] overflow-hidden"
           >
             <div

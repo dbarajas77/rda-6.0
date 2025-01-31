@@ -27,15 +27,13 @@ function Router() {
   }
 
   // Redirect to appropriate page based on auth status
-  if (!user && location === '/dashboard') {
-    setLocation('/auth');
-    return null;
-  }
-
-  if (user && (location === '/auth' || location === '/')) {
-    setLocation('/dashboard');
-    return null;
-  }
+  useEffect(() => {
+    if (!user && location === '/dashboard') {
+      setLocation('/auth');
+    } else if (user && (location === '/auth' || location === '/')) {
+      setLocation('/dashboard');
+    }
+  }, [user, location]);
 
   // If user is not logged in, show landing page and auth pages only
   if (!user) {
