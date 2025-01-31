@@ -1,0 +1,79 @@
+// First create: src/lib/supabaseClient.js
+// This file creates our connection to Supabase
+import { createClient } from '@supabase/supabase-js'
+
+// In Replit, we access secrets through process.env
+const supabaseUrl = process.env.VITE_SUPABASE_URL
+const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY
+
+// Create a single supabase client for the entire app
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+
+// Next, update: src/App.jsx
+// This shows a basic example of using Supabase in your app
+import { useState, useEffect } from 'react'
+import { supabase } from './lib/supabaseClient'
+
+function App() {
+  // Keep track of any loading states
+  const [isLoading, setIsLoading] = useState(true)
+  // Store any data we fetch
+  const [data, setData] = useState(null)
+  // Store any errors
+  const [error, setError] = useState(null)
+
+  // This effect runs when the component mounts
+  useEffect(() => {
+    // Let's test our Supabase connection
+    async function testConnection() {
+      try {
+        setIsLoading(true)
+        
+        // Try to connect to Supabase and get some data
+        // Replace 'your_table' with an actual table name from your database
+        const { data, error } = await supabase
+          .from('your_table')
+          .select('*')
+          .limit(1)
+        
+        if (error) {
+          throw error
+        }
+
+        setData(data)
+        console.log('Successfully connected to Supabase!')
+      } catch (err) {
+        setError(err.message)
+        console.error('Error connecting to Supabase:', err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    testConnection()
+  }, [])
+
+  return (
+    <div style={{ padding: '20px' }}>
+      <h1>My Supabase Replit App</h1>
+      
+      {isLoading && <p>Testing Supabase connection...</p>}
+      
+      {error && (
+        <div style={{ color: 'red', margin: '20px 0' }}>
+          <h3>Connection Error:</h3>
+          <p>{error}</p>
+        </div>
+      )}
+      
+      {data && (
+        <div style={{ margin: '20px 0' }}>
+          <h3>Connection Successful!</h3>
+          <pre>{JSON.stringify(data, null, 2)}</pre>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default App
