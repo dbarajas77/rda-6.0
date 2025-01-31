@@ -181,7 +181,8 @@ export default function DocumentCenter() {
                 />
               </div>
               <Button onClick={() => document.getElementById('fileUpload')?.click()} className="shadow-lg hover:shadow-xl">
-                <Upload className="w-4 h-4" />
+                <Upload className="w-4 h-4 mr-2" />
+                Add Document
                 <input
                   id="fileUpload"
                   type="file"
@@ -266,22 +267,18 @@ export default function DocumentCenter() {
 
       {/* Preview Dialog */}
       <Dialog open={showPreview} onOpenChange={setShowPreview}>
-        <DialogContent className="max-w-4xl h-[80vh]">
-          <DialogHeader>
-            <DialogTitle className="flex justify-between items-center">
-              <span>{selectedDocument?.name}</span>
-              <Button variant="ghost" size="icon" onClick={() => setShowPreview(false)}>
-                <X className="h-4 w-4" />
-              </Button>
-            </DialogTitle>
+        <DialogContent className="max-w-5xl min-h-[80vh] p-0">
+          <DialogHeader className="p-4 border-b">
+            <DialogTitle>{selectedDocument?.name}</DialogTitle>
           </DialogHeader>
-          <div className="flex-1 h-full">
+          <div className="relative flex-1 h-[calc(80vh-4rem)] overflow-hidden">
             {selectedDocument?.url ? (
               <div className="relative h-full">
                 <iframe
                   src={selectedDocument.url}
-                  className="w-full h-full rounded-lg border"
+                  className="absolute inset-0 w-full h-full"
                   title={selectedDocument.name}
+                  style={{ border: 'none' }}
                 />
                 <AnnotationLayer documentId={parseInt(selectedDocument.id)} />
               </div>
