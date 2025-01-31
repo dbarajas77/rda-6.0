@@ -1,0 +1,137 @@
+// First, create a new Vite React project if you haven't already:
+// npm create vite@latest my-project -- --template react
+// cd my-project
+// npm install
+
+// 1. First, let's set up the environment variables
+// Create a new file called .env in your project root
+VITE_SUPABASE_URL=https://qxiaqobepwspgigbzfnv.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF4aWFxb2JlcHdzcGdpZ2J6Zm52Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzgzNTMzNDIsImV4cCI6MjA1MzkyOTM0Mn0.jR4oLWFxICfe6dQpGIZpRRyeihKovoYarNp2xD3zOuI
+
+// 2. Create a new file: src/lib/supabaseClient.js
+// This file initializes the Supabase client that we'll use throughout the app
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+
+// 3. Update your src/App.jsx with a basic example
+// This example shows how to fetch data and handle authentication
+import { useState, useEffect } from 'react'
+import { supabase } from './lib/supabaseClient'
+
+function App() {
+  // State to store user data
+  const [user, setUser] = useState(null)
+  // State to store any data we fetch
+  const [data, setData] = useState(null)
+  // State to store any errors
+  const [error, setError] = useState(null)
+
+  // Effect to check authentication status
+  useEffect(() => {
+    // Get the current user session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null)
+    })
+
+    // Set up a listener for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+
+    // Cleanup subscription on unmount
+    return () => subscription.unsubscribe()
+  }, [])
+
+  // Example function to fetch data from your database
+  async function fetchData() {
+    try {
+      // Replace 'your_table' with your actual table name
+      const { data, error } = await supabase
+        .from('your_table')
+        .select('*')
+      
+      if (error) throw error
+      
+      setData(data)
+    } catch (error) {
+      setError(error.message)
+    }
+  }
+
+  // Example function to insert data
+  async function insertData(newItem) {
+    try {
+      const { data, error } = await supabase
+        .from('your_table')
+        .insert([newItem])
+        .select()
+
+      if (error) throw error
+      
+      // Update local data state with the new item
+      setData(prevData => [...prevData, data[0]])
+    } catch (error) {
+      setError(error.message)
+    }
+  }
+
+  return (
+    <div>
+      <h1>My Supabase App</h1>
+      
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+      
+      {/* Display user info if logged in */}
+      {user ? (
+        <div>
+          <p>Logged in as: {user.email}</p>
+          <button onClick={() => supabase.auth.signOut()}>Sign Out</button>
+        </div>
+      ) : (
+        <button onClick={() => supabase.auth.signInWithOAuth({
+          provider: 'github'
+        })}>Sign In with GitHub</button>
+      )}
+
+      {/* Data fetching example */}
+      <button onClick={fetchData}>Fetch Data</button>
+      
+      {/* Display fetched data */}
+      {data && (
+        <pre>{JSON.stringify(data, null, 2)}</pre>
+      )}
+    </div>
+  )
+}
+
+export default App
+
+// 4. Create a file for database types (optional but recommended)
+// src/types/database.types.ts
+export interface Database {
+  public: {
+    Tables: {
+      your_table: {
+        Row: {
+          id: number
+          created_at: string
+          // Add other columns from your table
+        }
+        Insert: {
+          // Fields that are required when inserting
+          id?: number
+          created_at?: string
+        }
+        Update: {
+          // Fields that can be updated
+          id?: number
+          created_at?: string
+        }
+      }
+    }
+  }
+}
