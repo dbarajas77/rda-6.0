@@ -59,7 +59,7 @@ export default function AIAssistant() {
       <motion.div
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="fixed left-6 bottom-6 z-50"
+        className="fixed right-6 bottom-6 z-50"
       >
         <Button
           size="icon"
@@ -164,7 +164,7 @@ export default function AIAssistant() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="fixed left-24 bottom-6 z-50"
+            className="fixed right-24 bottom-6 z-50"
           >
             <Button
               className="shadow-lg hover:shadow-xl"
