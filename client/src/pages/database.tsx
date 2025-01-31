@@ -13,7 +13,39 @@ interface Component {
   name: string;
   category: string;
   imageUrl: string;
+  description?: string;
 }
+
+const mockComponents: Component[] = [
+  {
+    id: "1",
+    name: "Pool Equipment",
+    category: "amenities",
+    imageUrl: "https://images.unsplash.com/photo-1575429198097-0414ec08e8cd",
+    description: "Main pool filtration system"
+  },
+  {
+    id: "2", 
+    name: "Tennis Court",
+    category: "sports",
+    imageUrl: "https://images.unsplash.com/photo-1554068865-24cecd4e34b8",
+    description: "Community tennis facilities"
+  },
+  {
+    id: "3",
+    name: "Clubhouse Roof",
+    category: "building",
+    imageUrl: "https://images.unsplash.com/photo-1605146769289-440113cc3d00",
+    description: "Main building roofing"
+  },
+  {
+    id: "4",
+    name: "Playground Equipment",
+    category: "amenities",
+    imageUrl: "https://images.unsplash.com/photo-1579704613784-9e71966e8595",
+    description: "Children's play area"
+  }
+];
 
 export default function DatabaseManagement() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -21,12 +53,12 @@ export default function DatabaseManagement() {
   const queryClient = useQueryClient();
 
   // Fetch components
-  const { data: components = [], isLoading } = useQuery<Component[]>({
+  const { data: components = mockComponents, isLoading } = useQuery<Component[]>({
     queryKey: ['components'],
     queryFn: async () => {
-      const response = await fetch('/api/components');
-      if (!response.ok) throw new Error('Failed to fetch components');
-      return response.json();
+      // Simulating API delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      return mockComponents;
     }
   });
 
