@@ -121,15 +121,7 @@ export default function DatabaseManagement() {
     return `https://source.unsplash.com/featured/800x600/?${categories[category] || category}`;
   };
 
-  const getRandomImage = (category: string) => {
-    const categories = {
-      amenities: "swimming+pool+equipment",
-      roofing: "roof",
-      building: "building+exterior",
-      landscape: "landscape+architecture"
-    };
-    return `https://source.unsplash.com/random/400x300/?${categories[category as keyof typeof categories] || category}`;
-  };
+  
 
   return (
     <div className="min-h-screen bg-cover bg-center relative">
