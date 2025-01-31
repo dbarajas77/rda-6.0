@@ -11,7 +11,7 @@ export default function Dashboard() {
       <div 
         className="fixed inset-0 -z-10"
         style={{
-          backgroundImage: 'url("/Banner-Image.jpg")',
+          backgroundImage: 'url("/hoa house.webp")',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           opacity: 0.15
