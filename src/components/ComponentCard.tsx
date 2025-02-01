@@ -14,7 +14,7 @@ export function ComponentCard({ component }: ComponentCardProps) {
   return (
     <Card 
       className="overflow-hidden w-[275px] h-[275px] cursor-pointer transition-transform hover:scale-105"
-      onClick={() => navigate("/database")}
+      onClick={() => navigate("/database?from=components")}
     >
       <div className="h-[160px] overflow-hidden">
         {component.image_url && (
