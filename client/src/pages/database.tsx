@@ -113,13 +113,11 @@ export default function DatabaseManagement() {
                         {component.asset_id}
                       </div>
                     </div>
-                    <div className="h-1/4 p-2 bg-white/80 backdrop-blur-sm">
+                    <div className="h-1/4 p-2 bg-white/80 backdrop-blur-sm flex flex-col">
                       <h3 className="font-medium text-sm mb-1 line-clamp-1">{component.component_name}</h3>
                       <p className="text-xs text-gray-600 capitalize">{component.category}</p>
-                    </div>
-                        <p>Useful Life: {component.useful_life} years</p>
-                        <p>Current Cost: ${component.current_cost?.toLocaleString()}</p>
-                      </div>
+                      <p>Useful Life: {component.useful_life} years</p>
+                      <p>Current Cost: ${component.current_cost?.toLocaleString()}</p>
                     </div>
                   </Card>
                 </motion.div>
