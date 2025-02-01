@@ -38,9 +38,9 @@ const registerSchema = loginSchema.extend({
 });
 
 const DEV_CREDENTIALS = {
-  email: "dev@example.com",
-  password: "dev_password",
-  fullName: "Development User",
+  email: "dan@reservedataanalysis.org",
+  password: "111111",
+  fullName: "Dan",
 };
 
 export default function AuthPage() {
