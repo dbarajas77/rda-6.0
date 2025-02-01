@@ -52,9 +52,9 @@ export default function DatabaseManagement() {
       <div className="fixed inset-0 bg-white/58 backdrop-blur-[2px] z-10" />
 
       <div className="fixed inset-[100px] z-20">
-        <Card className="shadow-2xl bg-white/58 backdrop-blur-md h-full">
-          <div className="p-6">
-            <div className="flex justify-between items-center mb-6">
+        <Card className="shadow-2xl bg-white/58 backdrop-blur-md h-full relative">
+          <div className="absolute inset-0 p-6 flex flex-col">
+            <div className="flex justify-between items-center mb-6 flex-shrink-0">
               <h1 className="text-3xl font-bold text-gray-800 bg-white/50 px-4 py-2 rounded-lg shadow-sm">Component Library</h1>
               <div className="flex gap-3">
                 <Button
@@ -66,7 +66,7 @@ export default function DatabaseManagement() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 overflow-auto max-h-[calc(100%-120px)] p-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 p-4 overflow-y-auto flex-grow scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400">
               {/* Add Component Card */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
