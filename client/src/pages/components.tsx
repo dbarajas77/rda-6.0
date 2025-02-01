@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -13,7 +12,7 @@ interface Component {
   category: string;
   description?: string;
   lastUpdated: string;
-  condition: 'critical' | 'poor' | 'average' | 'new';
+  condition: 'new' | 'good' | 'poor' | 'critical';
   placedInService: string;
   photos?: string[];
   siteNotes?: string;
@@ -38,11 +37,12 @@ export default function Components() {
         asset_id: selectedComponentId,
         name: params.get('customName') || '',
         category: '',  // This would come from your component data
-        condition: (params.get('condition') as Component['condition']) || 'average',
+        condition: (params.get('condition') as Component['condition']) || 'good',
         placedInService: params.get('placedInService') || new Date().toISOString(),
         siteNotes: params.get('notes') || '',
         lastUpdated: new Date().toISOString(),
-        currentCost: 0  // This would come from your component data
+        currentCost: 0,  // This would come from your component data
+        photos: params.get('photos') ? JSON.parse(params.get('photos')!) : []
       };
 
       setReportComponents(prev => [...prev, newComponent]);
@@ -107,13 +107,36 @@ export default function Components() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <Card className="h-[275px] overflow-hidden">
-                    <div className="p-4 h-full flex flex-col">
-                      <h3 className="font-medium text-lg mb-2">{component.name}</h3>
-                      <p className="text-sm text-muted-foreground mb-2">{component.description}</p>
-                      <div className="space-y-2 mt-auto">
+                  <Card className="h-[375px] overflow-hidden">
+                    {component.photos && component.photos[0] && (
+                      <div className="h-[160px] relative">
+                        <img
+                          src={component.photos[0]}
+                          alt={component.name}
+                          className="w-full h-full object-cover"
+                        />
+                        {component.photos.length > 1 && (
+                          <div className="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full">
+                            +{component.photos.length - 1}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    <div className="p-4 h-[215px] flex flex-col">
+                      <div className="flex justify-between items-start mb-2">
+                        <h3 className="font-medium text-lg">{component.name}</h3>
+                        <span className="text-xs bg-gray-100 px-2 py-1 rounded">
+                          ID: {component.asset_id}
+                        </span>
+                      </div>
+                      <div className="space-y-2 mt-2">
                         <p className="text-sm text-muted-foreground">
-                          Condition: <span className="font-medium">{component.condition}</span>
+                          Condition: <span className={`font-medium ${
+                            component.condition === 'critical' ? 'text-red-600' :
+                            component.condition === 'poor' ? 'text-orange-600' :
+                            component.condition === 'good' ? 'text-green-600' :
+                            'text-blue-600'
+                          }`}>{component.condition}</span>
                         </p>
                         <p className="text-sm text-muted-foreground">
                           In Service: <span className="font-medium">
@@ -121,7 +144,7 @@ export default function Components() {
                           </span>
                         </p>
                         {component.siteNotes && (
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-sm text-muted-foreground line-clamp-3">
                             Notes: <span className="font-medium">{component.siteNotes}</span>
                           </p>
                         )}

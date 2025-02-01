@@ -3,8 +3,8 @@ import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, X } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Search, Plus, X, Upload } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLocation } from "wouter";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,18 +14,17 @@ interface Component {
   id: string;
   name: string;
   category: string;
-  useful_life: number;
-  current_cost: number;
   image_url?: string;
   component_name?: string;
   asset_id?: string;
 }
 
 interface ComponentForm {
-  condition: 'new' | 'average' | 'poor' | 'critical';
+  condition: 'new' | 'good' | 'poor' | 'critical';
   placedInService: string;
   notes: string;
   customName: string;
+  photos: string[];
 }
 
 export default function DatabaseManagement() {
@@ -37,10 +36,11 @@ export default function DatabaseManagement() {
   const [selectedComponent, setSelectedComponent] = useState<Component | null>(null);
   const [showComponentForm, setShowComponentForm] = useState(false);
   const [formData, setFormData] = useState<ComponentForm>({
-    condition: 'average',
+    condition: 'good',
     placedInService: '',
     notes: '',
-    customName: ''
+    customName: '',
+    photos: []
   });
 
   // Check if we came from the components page
@@ -48,7 +48,24 @@ export default function DatabaseManagement() {
 
   const handleComponentClick = (component: Component) => {
     setSelectedComponent(component);
+    setFormData(prev => ({
+      ...prev,
+      customName: component.component_name || ''
+    }));
     setShowComponentForm(true);
+  };
+
+  const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const newPhotos = [...formData.photos];
+        newPhotos[index] = reader.result as string;
+        setFormData(prev => ({ ...prev, photos: newPhotos }));
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleAddToReport = () => {
@@ -59,14 +76,13 @@ export default function DatabaseManagement() {
         condition: formData.condition,
         placedInService: formData.placedInService,
         notes: formData.notes,
-        customName: formData.customName || selectedComponent.name
+        customName: formData.customName,
+        photos: JSON.stringify(formData.photos)
       });
       setLocation(`/components?${queryParams.toString()}`);
-    } else {
-      // Handle regular component addition here
-      setShowComponentForm(false);
-      setSelectedComponent(null);
     }
+    setShowComponentForm(false);
+    setSelectedComponent(null);
   };
 
   const filteredComponents = components.filter(component => {
@@ -224,63 +240,120 @@ export default function DatabaseManagement() {
       {/* Component Form Dialog */}
       <Dialog open={showComponentForm} onOpenChange={setShowComponentForm}>
         <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Add Component Details</DialogTitle>
-            <DialogDescription>
-              Add additional information about this component before adding it to your report.
-            </DialogDescription>
+          <DialogHeader className="relative border-b pb-4">
+            <DialogTitle>Edit Assessment</DialogTitle>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-0 top-0"
+              onClick={() => setShowComponentForm(false)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </DialogHeader>
 
-          <div className="space-y-4 py-4">
-            <div>
-              <label className="text-sm font-medium">Custom Name (Optional)</label>
-              <Input
-                placeholder="Enter a custom name for this component"
-                value={formData.customName}
-                onChange={(e) => setFormData({...formData, customName: e.target.value})}
-              />
+          <div className="space-y-6 py-4">
+            {selectedComponent && (
+              <div className="bg-muted/50 p-2 rounded-lg text-center">
+                <span className="text-sm font-medium">Asset ID: {selectedComponent.asset_id}</span>
+              </div>
+            )}
+
+            {/* Photo Upload Section */}
+            <div className="grid grid-cols-3 gap-4">
+              {[0, 1, 2].map((index) => (
+                <div key={index} className="relative aspect-square">
+                  {formData.photos[index] ? (
+                    <div className="relative w-full h-full">
+                      <img
+                        src={formData.photos[index]}
+                        alt={`Photo ${index + 1}`}
+                        className="w-full h-full object-cover rounded-lg"
+                      />
+                      <button
+                        onClick={() => {
+                          const newPhotos = [...formData.photos];
+                          newPhotos[index] = '';
+                          setFormData(prev => ({ ...prev, photos: newPhotos }));
+                        }}
+                        className="absolute top-2 right-2 p-1 rounded-full bg-red-500/90 text-white hover:bg-red-600/90"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="w-full h-full">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handlePhotoUpload(e, index)}
+                        className="hidden"
+                        id={`photo-${index}`}
+                      />
+                      <label
+                        htmlFor={`photo-${index}`}
+                        className="w-full h-full border-2 border-dashed rounded-lg p-4 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-primary/50 transition-colors"
+                      >
+                        <Upload className="w-8 h-8 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground">Photo {index + 1}</span>
+                      </label>
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
 
-            <div>
-              <label className="text-sm font-medium">Condition</label>
-              <Select
-                value={formData.condition}
-                onValueChange={(value: ComponentForm['condition']) => 
-                  setFormData({...formData, condition: value})}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select condition" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="new">New</SelectItem>
-                  <SelectItem value="average">Average</SelectItem>
-                  <SelectItem value="poor">Poor</SelectItem>
-                  <SelectItem value="critical">Critical</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            {/* Component Details Form */}
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Component Name</label>
+                <Input
+                  value={formData.customName}
+                  onChange={(e) => setFormData({...formData, customName: e.target.value})}
+                />
+              </div>
 
-            <div>
-              <label className="text-sm font-medium">Placed in Service</label>
-              <Input
-                type="date"
-                value={formData.placedInService}
-                onChange={(e) => setFormData({...formData, placedInService: e.target.value})}
-              />
-            </div>
+              <div>
+                <label className="text-sm font-medium">Condition</label>
+                <Select
+                  value={formData.condition}
+                  onValueChange={(value: ComponentForm['condition']) => 
+                    setFormData({...formData, condition: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select condition" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="new">New</SelectItem>
+                    <SelectItem value="good">Good</SelectItem>
+                    <SelectItem value="poor">Poor</SelectItem>
+                    <SelectItem value="critical">Critical</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <div>
-              <label className="text-sm font-medium">Notes</label>
-              <Textarea
-                placeholder="Add any additional notes about this component..."
-                value={formData.notes}
-                onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                className="min-h-[100px]"
-              />
+              <div>
+                <label className="text-sm font-medium">Placed in Service</label>
+                <Input
+                  type="date"
+                  value={formData.placedInService}
+                  onChange={(e) => setFormData({...formData, placedInService: e.target.value})}
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium">Notes</label>
+                <Textarea
+                  placeholder="Add any additional notes..."
+                  value={formData.notes}
+                  onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                  className="min-h-[100px]"
+                />
+              </div>
             </div>
           </div>
 
-          <DialogFooter>
+          <div className="flex justify-end gap-2 pt-4 border-t">
             <Button variant="outline" onClick={() => {
               setShowComponentForm(false);
               setSelectedComponent(null);
@@ -288,7 +361,7 @@ export default function DatabaseManagement() {
               Cancel
             </Button>
             <Button onClick={handleAddToReport}>Add to Report</Button>
-          </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
