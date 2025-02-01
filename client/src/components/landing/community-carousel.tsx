@@ -10,25 +10,19 @@ interface Community {
 }
 
 export default function CommunityCarousel() {
-  const { data: communities = [] } = useQuery<Community[]>({
-    queryKey: ['communities'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('communities')
-        .select('*')
-        .order('id', { ascending: true });
-
-      if (error) throw error;
-      return data || [];
-    }
-  });
+  // Temporary data for demonstration
+  const communities = [
+    { id: 1, name: 'Community 1', image_path: 'community-bg.jpg' },
+    { id: 2, name: 'Community 2', image_path: 'community-bg.jpg' },
+    { id: 3, name: 'Community 3', image_path: 'community-bg.jpg' },
+  ];
 
   // Create two rows of communities by duplicating the array
   const rowOne = [...communities, ...communities];
   const rowTwo = [...communities, ...communities];
 
   return (
-    <div className="relative w-full overflow-hidden">
+    <div className="relative w-full overflow-hidden h-[300px]">
       {/* Top row - moving right */}
       <motion.div
         className="flex gap-4 mb-4"
