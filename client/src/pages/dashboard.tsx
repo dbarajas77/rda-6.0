@@ -4,7 +4,7 @@ import QuickAccess from "@/components/dashboard/quick-access";
 
 export default function Dashboard() {
   return (
-    <div className="min-h-screen bg-cover bg-center relative" style={{ backgroundImage: 'url("/Banner-Image.jpg")' }}>
+    <div className="min-h-screen bg-cover bg-center relative" style={{ backgroundImage: 'url("/house-keys.jpg")' }}>
       {/* Overlay */}
       <div className="absolute inset-0 bg-black/30" />
       
