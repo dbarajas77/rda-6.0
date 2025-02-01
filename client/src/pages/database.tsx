@@ -3,9 +3,11 @@ import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
-import { Plus } from "lucide-react";
+import { Search, Plus, X } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLocation } from "wouter";
+import { Textarea } from "@/components/ui/textarea";
 import { useComponents } from "@/hooks/useComponents";
 
 interface Component {
@@ -19,17 +21,12 @@ interface Component {
   asset_id?: string;
 }
 
-const getRandomImage = (category: string) => {
-  const categories: Record<string, string> = {
-    amenities: "community+pool",
-    roofing: "modern+roof",
-    building: "modern+building+facade",
-    landscape: "garden+landscape"
-  };
-  const defaultQuery = "building+exterior";
-  const searchQuery = categories[category] || defaultQuery;
-  return `https://source.unsplash.com/featured/800x600/?${searchQuery}`;
-};
+interface ComponentForm {
+  condition: 'new' | 'average' | 'poor' | 'critical';
+  placedInService: string;
+  notes: string;
+  customName: string;
+}
 
 export default function DatabaseManagement() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -37,14 +34,36 @@ export default function DatabaseManagement() {
   const [, setLocation] = useLocation();
   const [location] = useLocation();
   const { data: components = [], isLoading } = useComponents();
+  const [selectedComponent, setSelectedComponent] = useState<Component | null>(null);
+  const [showComponentForm, setShowComponentForm] = useState(false);
+  const [formData, setFormData] = useState<ComponentForm>({
+    condition: 'average',
+    placedInService: '',
+    notes: '',
+    customName: ''
+  });
 
   // Check if we came from the components page
   const isFromComponents = location.includes('from=components');
 
   const handleComponentClick = (component: Component) => {
     if (isFromComponents) {
-      // Navigate back to components page with the selected component
-      setLocation(`/components?selected=${component.asset_id}`);
+      setSelectedComponent(component);
+      setShowComponentForm(true);
+    }
+  };
+
+  const handleAddToReport = () => {
+    if (selectedComponent) {
+      // Navigate back to components page with all the component data
+      const queryParams = new URLSearchParams({
+        selected: selectedComponent.asset_id || '',
+        condition: formData.condition,
+        placedInService: formData.placedInService,
+        notes: formData.notes,
+        customName: formData.customName || selectedComponent.name
+      });
+      setLocation(`/components?${queryParams.toString()}`);
     }
   };
 
@@ -172,7 +191,7 @@ export default function DatabaseManagement() {
                   >
                     <div className="h-[160px] relative">
                       <img 
-                        src={component.image_url || getRandomImage(component.category)}
+                        src={component.image_url || `https://source.unsplash.com/featured/800x600/?${component.category}`}
                         alt={component.name}
                         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                         loading="lazy"
@@ -199,6 +218,77 @@ export default function DatabaseManagement() {
           </div>
         </Card>
       </div>
+
+      {/* Component Form Dialog */}
+      <Dialog open={showComponentForm} onOpenChange={setShowComponentForm}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Add Component Details</DialogTitle>
+            <DialogDescription>
+              Add additional information about this component before adding it to your report.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="text-sm font-medium">Custom Name (Optional)</label>
+              <Input
+                placeholder="Enter a custom name for this component"
+                value={formData.customName}
+                onChange={(e) => setFormData({...formData, customName: e.target.value})}
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium">Condition</label>
+              <Select
+                value={formData.condition}
+                onValueChange={(value: ComponentForm['condition']) => 
+                  setFormData({...formData, condition: value})}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select condition" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="new">New</SelectItem>
+                  <SelectItem value="average">Average</SelectItem>
+                  <SelectItem value="poor">Poor</SelectItem>
+                  <SelectItem value="critical">Critical</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium">Placed in Service</label>
+              <Input
+                type="date"
+                value={formData.placedInService}
+                onChange={(e) => setFormData({...formData, placedInService: e.target.value})}
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium">Notes</label>
+              <Textarea
+                placeholder="Add any additional notes about this component..."
+                value={formData.notes}
+                onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                className="min-h-[100px]"
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setShowComponentForm(false);
+              setSelectedComponent(null);
+            }}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddToReport}>Add to Report</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

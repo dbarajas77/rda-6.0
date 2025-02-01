@@ -18,6 +18,7 @@ interface Component {
   photos?: string[];
   siteNotes?: string;
   currentCost: number;
+  asset_id?: string;
 }
 
 export default function Components() {
@@ -26,17 +27,30 @@ export default function Components() {
   const [location] = useLocation();
 
   // Handle component selection from database page
-  const params = new URLSearchParams(location.split('?')[1]);
-  const selectedComponentId = params.get('selected');
-
-  // If a component was selected from database, add it to report
   useEffect(() => {
+    const params = new URLSearchParams(location.split('?')[1]);
+    const selectedComponentId = params.get('selected');
+
     if (selectedComponentId) {
-      // Here you would typically fetch the component details using the ID
-      // and add it to reportComponents
-      console.log('Selected component:', selectedComponentId);
+      // Create a new component from the URL parameters
+      const newComponent: Component = {
+        id: selectedComponentId,
+        asset_id: selectedComponentId,
+        name: params.get('customName') || '',
+        category: '',  // This would come from your component data
+        condition: (params.get('condition') as Component['condition']) || 'average',
+        placedInService: params.get('placedInService') || new Date().toISOString(),
+        siteNotes: params.get('notes') || '',
+        lastUpdated: new Date().toISOString(),
+        currentCost: 0  // This would come from your component data
+      };
+
+      setReportComponents(prev => [...prev, newComponent]);
+
+      // Clear the URL parameters after adding the component
+      setLocation('/components', { replace: true });
     }
-  }, [selectedComponentId]);
+  }, [location, setLocation]);
 
   return (
     <div className="min-h-screen bg-cover bg-center relative">
@@ -93,12 +107,25 @@ export default function Components() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <Card className="h-[275px]">
-                    {/* Component details */}
-                    <div className="p-4">
-                      <h3 className="font-medium text-lg">{component.name}</h3>
-                      <p className="text-sm text-muted-foreground">{component.description}</p>
-                      <p className="text-sm text-muted-foreground">Condition: {component.condition}</p>
+                  <Card className="h-[275px] overflow-hidden">
+                    <div className="p-4 h-full flex flex-col">
+                      <h3 className="font-medium text-lg mb-2">{component.name}</h3>
+                      <p className="text-sm text-muted-foreground mb-2">{component.description}</p>
+                      <div className="space-y-2 mt-auto">
+                        <p className="text-sm text-muted-foreground">
+                          Condition: <span className="font-medium">{component.condition}</span>
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          In Service: <span className="font-medium">
+                            {new Date(component.placedInService).toLocaleDateString()}
+                          </span>
+                        </p>
+                        {component.siteNotes && (
+                          <p className="text-sm text-muted-foreground">
+                            Notes: <span className="font-medium">{component.siteNotes}</span>
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </Card>
                 </motion.div>
