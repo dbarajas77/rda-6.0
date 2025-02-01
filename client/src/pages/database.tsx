@@ -74,7 +74,7 @@ export default function DatabaseManagement() {
                 transition={{ duration: 0.3 }}
               >
                 <Card
-                  className="group relative overflow-hidden h-[360px] cursor-pointer"
+                  className="group relative overflow-hidden w-[275px] h-[275px] cursor-pointer"
                   variant="glass"
                   hover={true}
                   onClick={() => setShowDialog(true)}
@@ -136,22 +136,49 @@ export default function DatabaseManagement() {
             </div>
           </DialogHeader>
 
-          <div className="grid grid-cols-12 gap-6 py-4">
-            <div className="col-span-4 space-y-4">
-              {[1, 2, 3].map((index) => (
-                <div key={index} className="border-2 border-dashed rounded-lg p-4 text-center hover:border-blue-400 transition-colors">
-                  <Plus className="w-8 h-8 mx-auto text-gray-400 mb-2" />
-                  <p className="text-sm text-gray-600">Upload image {index}</p>
+          <div className="flex flex-col space-y-6 p-4">
+            <div className="grid grid-cols-2 gap-4">
+              {[1, 2].map((index) => (
+                <div 
+                  key={index} 
+                  className="aspect-square border-2 border-dashed rounded-xl p-4 hover:border-blue-400 hover:bg-blue-50/50 transition-all duration-300 cursor-pointer relative group"
+                >
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    className="absolute inset-0 opacity-0 cursor-pointer z-10" 
+                  />
+                  <div className="h-full flex flex-col items-center justify-center">
+                    <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                      <Plus className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <p className="text-sm font-medium text-gray-700">Upload Image {index}</p>
+                    <p className="text-xs text-gray-500 mt-1">PNG, JPG up to 10MB</p>
+                  </div>
                 </div>
               ))}
             </div>
 
-            <div className="col-span-8 space-y-6">
-              <Input 
-                placeholder="Component Name"
-                value={newComponent.name || ''}
-                onChange={(e) => setNewComponent({...newComponent, name: e.target.value})}
-              />
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1 block">Component Name</label>
+                <Input 
+                  placeholder="Enter component name"
+                  value={newComponent.name || ''}
+                  onChange={(e) => setNewComponent({...newComponent, name: e.target.value})}
+                  className="border-gray-200 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1 block">Description</label>
+                <Textarea 
+                  placeholder="Enter component description"
+                  value={newComponent.description || ''}
+                  onChange={(e) => setNewComponent({...newComponent, description: e.target.value})}
+                  className="min-h-[100px] border-gray-200 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
 
               <Select 
                 value={newComponent.category}
