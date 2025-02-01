@@ -47,14 +47,12 @@ export default function DatabaseManagement() {
   const isFromComponents = location.includes('from=components');
 
   const handleComponentClick = (component: Component) => {
-    if (isFromComponents) {
-      setSelectedComponent(component);
-      setShowComponentForm(true);
-    }
+    setSelectedComponent(component);
+    setShowComponentForm(true);
   };
 
   const handleAddToReport = () => {
-    if (selectedComponent) {
+    if (selectedComponent && isFromComponents) {
       // Navigate back to components page with all the component data
       const queryParams = new URLSearchParams({
         selected: selectedComponent.asset_id || '',
@@ -64,6 +62,10 @@ export default function DatabaseManagement() {
         customName: formData.customName || selectedComponent.name
       });
       setLocation(`/components?${queryParams.toString()}`);
+    } else {
+      // Handle regular component addition here
+      setShowComponentForm(false);
+      setSelectedComponent(null);
     }
   };
 
@@ -184,7 +186,7 @@ export default function DatabaseManagement() {
                   transition={{ duration: 0.3 }}
                 >
                   <Card 
-                    className={`group relative overflow-hidden w-[275px] h-[275px] ${isFromComponents ? 'cursor-pointer' : ''}`}
+                    className="group relative overflow-hidden w-[275px] h-[275px] cursor-pointer"
                     variant="glass"
                     hover={true}
                     onClick={() => handleComponentClick(component)}
