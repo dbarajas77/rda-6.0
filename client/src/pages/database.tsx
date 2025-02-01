@@ -75,26 +75,55 @@ export default function DatabaseManagement() {
               </div>
             </div>
 
-            <div className="flex items-center mb-4">
-              <Input
-                type="text"
-                placeholder="Search components..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full mr-4"
-              />
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Filter by category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="roofing">Roofing</SelectItem>
-                  <SelectItem value="amenities">Amenities</SelectItem>
-                  <SelectItem value="building">Building</SelectItem>
-                  <SelectItem value="landscape">Landscape</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="flex items-center mb-6">
+              <div className="relative w-full">
+                <Input
+                  type="text"
+                  placeholder="Search components..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 h-12 text-lg bg-white/80 backdrop-blur-sm border-2 border-gray-200 focus:border-blue-400 rounded-xl shadow-lg transition-all duration-300"
+                />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              </div>
+            </div>
+
+            <div className="flex gap-2 mb-4 flex-wrap">
+              <Button
+                variant={selectedCategory === 'all' ? 'default' : 'outline'} 
+                onClick={() => setSelectedCategory('all')}
+                className="rounded-full"
+              >
+                All
+              </Button>
+              <Button
+                variant={selectedCategory === 'roofing' ? 'default' : 'outline'}
+                onClick={() => setSelectedCategory('roofing')}
+                className="rounded-full bg-red-100 hover:bg-red-200 text-red-800 border-red-200"
+              >
+                Roofing
+              </Button>
+              <Button
+                variant={selectedCategory === 'amenities' ? 'default' : 'outline'}
+                onClick={() => setSelectedCategory('amenities')}
+                className="rounded-full bg-blue-100 hover:bg-blue-200 text-blue-800 border-blue-200"
+              >
+                Amenities
+              </Button>
+              <Button
+                variant={selectedCategory === 'building' ? 'default' : 'outline'}
+                onClick={() => setSelectedCategory('building')}
+                className="rounded-full bg-green-100 hover:bg-green-200 text-green-800 border-green-200"
+              >
+                Building
+              </Button>
+              <Button
+                variant={selectedCategory === 'landscape' ? 'default' : 'outline'}
+                onClick={() => setSelectedCategory('landscape')}
+                className="rounded-full bg-yellow-100 hover:bg-yellow-200 text-yellow-800 border-yellow-200"
+              >
+                Landscape
+              </Button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 p-4 overflow-y-auto flex-grow scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400">
