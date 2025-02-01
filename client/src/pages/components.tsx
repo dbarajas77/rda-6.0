@@ -142,49 +142,6 @@ export default function Components() {
                   </div>
                 </Card>
               </motion.div>
-
-              {/* Report Components */}
-              {reportComponents.map((component) => (
-                <motion.div
-                  key={component.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <Card 
-                    className="group relative overflow-hidden h-[360px]"
-                    variant="glass"
-                    hover={true}
-                  >
-                    <div className="aspect-[4/3] w-full relative">
-                      {component.photos?.[0] ? (
-                        <img
-                          src={component.photos[0]}
-                          alt={component.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-muted flex items-center justify-center">
-                          <Camera className="w-8 h-8 text-muted-foreground" />
-                        </div>
-                      )}
-                      <div className={`absolute top-2 right-2 px-2 py-1 rounded text-xs font-medium ${
-                        component.condition === 'new' ? 'bg-green-500/90 text-white' :
-                          component.condition === 'average' ? 'bg-yellow-500/90 text-white' :
-                            component.condition === 'poor' ? 'bg-orange-500/90 text-white' :
-                              'bg-red-500/90 text-white'
-                      }`}>
-                        {component.condition}
-                      </div>
-                    </div>
-                    <CardContent className="p-4">
-                      <h3 className="font-medium text-lg mb-2">{component.name}</h3>
-                      <p className="text-sm text-muted-foreground mb-2">{component.description}</p>
-                      <p className="text-sm">Cost: ${component.currentCost.toLocaleString()}</p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
             </div>
           </div>
         </Card>
