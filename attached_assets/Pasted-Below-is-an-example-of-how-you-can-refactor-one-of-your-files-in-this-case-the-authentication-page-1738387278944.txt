@@ -1,0 +1,347 @@
+Below is an example of how you can refactor one of your files (in this case, the authentication page) so that the code is clean, consistently formatted, and the functionality is preserved. Then, I’ve included a set of guidelines you can follow for the rest of your project.
+
+1. Example Refactored File (AuthPage)
+Before:
+Your original AuthPage code was a long file with multiple imports and mixed formatting.
+
+After:
+Below is the refactored version of your AuthPage component. Notice how we’ve:
+
+Grouped similar imports (e.g. React hooks, UI components, icons) with proper newlines.
+Used consistent indentation and spacing.
+Kept the same functions and logic (such as handling form submission, switching tabs, and showing the dev panel) but with clearer structure.
+Added comments and organized useEffects so that it’s easier to follow.
+jsx
+Copy
+// src/pages/AuthPage.jsx
+import { useEffect, useState } from "react";
+import { useLocation } from "wouter";
+import { motion } from "framer-motion";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+
+// Custom hooks and UI components
+import { useAuth } from "@/lib/auth";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Eye, EyeOff, Terminal } from "lucide-react";
+
+// Define schemas for login and register forms
+const loginSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+const registerSchema = loginSchema.extend({
+  fullName: z.string().min(2, "Full name must be at least 2 characters"),
+});
+
+// Development credentials for testing
+const DEV_CREDENTIALS = {
+  email: "dev@example.com",
+  password: "dev_password",
+  fullName: "Development User",
+};
+
+export default function AuthPage() {
+  const [, setLocation] = useLocation();
+  const { user, signIn, signUp } = useAuth();
+  const { toast } = useToast();
+
+  // Local state for UI behaviors
+  const [showPassword, setShowPassword] = useState(false);
+  const [showDevPanel, setShowDevPanel] = useState(false);
+  const [activeTab, setActiveTab] = useState("login");
+
+  // Initialize react-hook-form with zod validation
+  const form = useForm({
+    resolver: zodResolver(activeTab === "login" ? loginSchema : registerSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      fullName: "",
+    },
+  });
+
+  // Redirect if the user is already authenticated
+  useEffect(() => {
+    if (user) {
+      setLocation("/dashboard");
+    }
+  }, [user, setLocation]);
+
+  // Handle form submission for both login and register
+  const onSubmit = async (values) => {
+    try {
+      const isLogin = activeTab === "login";
+      console.log("Submitting form:", { isLogin, values });
+
+      if (isLogin) {
+        await signIn(values.email, values.password);
+      } else {
+        await signUp(values.email, values.password, values.fullName);
+      }
+
+      toast({
+        title: "Success",
+        description: isLogin
+          ? "Welcome back!"
+          : "Account created successfully",
+      });
+    } catch (error) {
+      console.error("Auth error:", error);
+      toast({
+        variant: "destructive",
+        title: "Authentication Error",
+        description:
+          error.message || "Please check your credentials and try again",
+      });
+    }
+  };
+
+  // Reset the form when switching between Login and Register
+  useEffect(() => {
+    form.reset({
+      email: "",
+      password: "",
+      fullName: "",
+    });
+  }, [activeTab, form]);
+
+  // Pre-fill development credentials for testing purposes
+  const fillDevCredentials = (isLogin) => {
+    setActiveTab(isLogin ? "login" : "register");
+    const values = isLogin
+      ? {
+          email: DEV_CREDENTIALS.email,
+          password: DEV_CREDENTIALS.password,
+        }
+      : DEV_CREDENTIALS;
+    form.reset(values);
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-secondary/5 px-4">
+      {/* Development Mode Panel (only visible in DEV mode) */}
+      {import.meta.env.DEV && (
+        <div className="fixed bottom-4 right-4 z-50">
+          <Button
+            variant="outline"
+            size="sm"
+            className="mb-2"
+            onClick={() => setShowDevPanel(!showDevPanel)}
+          >
+            <Terminal className="h-4 w-4 mr-2" />
+            Dev Panel
+          </Button>
+          {showDevPanel && (
+            <Card className="w-80 absolute bottom-12 right-0 border-destructive">
+              <CardHeader>
+                <CardTitle className="text-sm font-medium">
+                  Development Credentials
+                </CardTitle>
+                <CardDescription className="text-xs">
+                  For testing purposes only
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm">
+                <div>
+                  <p>
+                    <strong>Email:</strong> {DEV_CREDENTIALS.email}
+                  </p>
+                  <p>
+                    <strong>Password:</strong> {DEV_CREDENTIALS.password}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button size="sm" onClick={() => fillDevCredentials(true)}>
+                    Fill Login
+                  </Button>
+                  <Button size="sm" onClick={() => fillDevCredentials(false)}>
+                    Fill Register
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-md"
+      >
+        <Card className="backdrop-blur-sm bg-white/95">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl font-bold text-center">
+              Welcome
+            </CardTitle>
+            <CardDescription className="text-center">
+              Sign in to access your HOA management dashboard
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Tabs
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="space-y-4"
+            >
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="login">Login</TabsTrigger>
+                <TabsTrigger value="register">Register</TabsTrigger>
+              </TabsList>
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-4"
+                >
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="email"
+                            placeholder="Enter your email"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {activeTab === "register" && (
+                    <FormField
+                      control={form.control}
+                      name="fullName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Full Name</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Enter your full name"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Password</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Input
+                              type={showPassword ? "text" : "password"}
+                              placeholder={
+                                activeTab === "login"
+                                  ? "Enter your password"
+                                  : "Choose a password"
+                              }
+                              {...field}
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                              onClick={() => setShowPassword(!showPassword)}
+                            >
+                              {showPassword ? (
+                                <EyeOff className="h-4 w-4 text-muted-foreground" />
+                              ) : (
+                                <Eye className="h-4 w-4 text-muted-foreground" />
+                              )}
+                            </Button>
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <Button type="submit" className="w-full">
+                    {activeTab === "login"
+                      ? "Sign In"
+                      : "Create Account"}
+                  </Button>
+                </form>
+              </Form>
+            </Tabs>
+          </CardContent>
+        </Card>
+      </motion.div>
+    </div>
+  );
+}
+2. Guidelines for Refactoring the Rest of Your Project
+To fix and align everything in your project while keeping the functionality the same, follow these steps:
+
+Use a Code Formatter and Linter:
+– Set up Prettier and ESLint in your project.
+– This will help automatically format your code (consistent indentation, spacing, and quotes) and catch common mistakes.
+
+Organize Your File Structure:
+– Place each component or page in its own file (e.g., AuthPage.jsx, Dashboard.jsx, DocumentCenter.jsx).
+– Group shared components (like UI elements, hooks, or utilities) in folders such as /components, /hooks, or /lib.
+
+Consolidate Duplicate Imports:
+– Remove duplicate or redundant imports. For example, if you import motion from "framer-motion" in multiple files, ensure each file imports it only once. – Use barrel files (an index.js in a folder) if you need to re-export many components from the same directory.
+
+Keep Consistent Naming Conventions:
+– Use consistent naming for components, variables, and files. For example, if your component is named AuthPage, the file should be named AuthPage.jsx (or .tsx if you use TypeScript). – Use consistent folder naming (e.g., all lowercase for directories).
+
+Separate Concerns:
+– If some logic is shared among components (such as form validation or API calls), extract it into custom hooks or helper functions. – This makes your components smaller and easier to maintain.
+
+Review Routing and Providers:
+– Make sure that your router (using wouter in your case) is set up in a single file (e.g., App.jsx) and that all protected routes are wrapped by your custom ProtectedRoute. – Confirm that context providers (like your AuthProvider and QueryClientProvider) wrap the entire application.
+
+Test Each Component Individually:
+– After refactoring, test each component (using your development server) to ensure that the functions (e.g., sign in, file uploads, report generation) work as expected. – Use console logs or a debugger to trace any issues.
+
+Document Your Changes:
+– Write clear comments and documentation (either inline or in a separate README) to describe what each component does.
+– This will help future you (and other developers) to understand the code quickly.
+
+3. Final Notes
+Keep It Simple:
+The goal is to maintain the same functionality while improving code readability and maintainability. Avoid introducing unnecessary complexity.
+
+Step-by-Step Refactoring:
+Start with one page (like the AuthPage above) and then move on to the others (CommunityPhotos, Components, DatabaseManagement, Dashboard, DocumentCenter, etc.), applying the same guidelines.
+
+Use Version Control:
+Make incremental commits as you refactor. This way, if anything breaks, you can revert to a previous working version.
+
+Following these steps should help you “fix” your project by making the code easier to read, understand, and maintain—all while keeping the functions and behavior the same.
+
+If you run into any specific errors or need further help with one of the components, feel free to ask!
