@@ -13,19 +13,32 @@ import Components from "@/pages/components";
 import DatabaseManagement from "@/pages/database";
 import NotFound from "@/pages/not-found";
 import Layout from "@/components/shared/layout";
+import { motion, AnimatePresence } from "framer-motion";
 
 function Router() {
+  const pageTransition = {
+    initial: { opacity: 0, x: -20 },
+    animate: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: 20 }
+  };
+
   return (
-    <Switch>
-      <Route path="/" component={LandingPage} />
-      <Route path="/auth" component={AuthPage} />
-      <ProtectedRoute path="/dashboard" component={Dashboard} />
-      <ProtectedRoute path="/documents" component={DocumentCenter} />
-      <ProtectedRoute path="/photos" component={CommunityPhotos} />
-      <ProtectedRoute path="/components" component={Components} />
-      <ProtectedRoute path="/database" component={DatabaseManagement} />
-      <Route component={NotFound} />
-    </Switch>
+    <AnimatePresence mode="wait">
+      <Switch>
+        <Route path="/" component={LandingPage} />
+        <Route path="/auth" component={AuthPage} />
+        <Route path="/dashboard">
+          <motion.div {...pageTransition}>
+            <Dashboard />
+          </motion.div>
+        </Route>
+        <ProtectedRoute path="/documents" component={DocumentCenter} />
+        <ProtectedRoute path="/photos" component={CommunityPhotos} />
+        <ProtectedRoute path="/components" component={Components} />
+        <ProtectedRoute path="/database" component={DatabaseManagement} />
+        <Route component={NotFound} />
+      </Switch>
+    </AnimatePresence>
   );
 }
 
