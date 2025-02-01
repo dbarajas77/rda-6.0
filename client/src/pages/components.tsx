@@ -24,28 +24,7 @@ interface Component {
   currentCost: number;
 }
 
-const mockDatabaseComponents = [
-  {
-    id: "DB-001",
-    name: "Swimming Pool Equipment",
-    category: "amenities",
-    description: "Main pool filtration and heating system",
-    currentCost: 15000,
-    lastUpdated: "2024-01-15",
-    condition: 'average',
-    placedInService: "2020-05-10"
-  },
-  {
-    id: "DB-002",
-    name: "Clubhouse HVAC",
-    category: "building",
-    description: "Central air conditioning system",
-    currentCost: 22000,
-    lastUpdated: "2024-01-20",
-    condition: 'poor',
-    placedInService: "2018-11-15"
-  }
-] as Component[];
+const mockDatabaseComponents = [] as Component[];
 
 export default function Components() {
   const [selectedDBComponent, setSelectedDBComponent] = useState<Component | null>(null);
