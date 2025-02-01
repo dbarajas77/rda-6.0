@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -19,8 +19,8 @@ interface Component {
   useful_life: number;
   current_cost: number;
   image_url?: string;
-  component_name?: string; // Added to handle potential missing property
-  asset_id?: string; // Added to handle potential missing property
+  component_name?: string;
+  asset_id?: string;
 }
 
 const getRandomImage = (category: string) => {
@@ -41,7 +41,26 @@ export default function DatabaseManagement() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [newComponent, setNewComponent] = useState<Partial<Component>>({});
   const [, setLocation] = useLocation();
+  const [location] = useLocation();
   const { data: components = [], isLoading } = useComponents();
+  const [selectedComponent, setSelectedComponent] = useState<Component | null>(null);
+
+  // Check if we came from the components page
+  const isFromComponents = location.includes('from=components');
+
+  const handleComponentClick = (component: Component) => {
+    if (isFromComponents) {
+      setSelectedComponent(component);
+      setShowDialog(true);
+    }
+  };
+
+  const handleAddToReport = () => {
+    if (selectedComponent) {
+      // Navigate back to components page with the selected component
+      setLocation(`/components?selected=${selectedComponent.asset_id}`);
+    }
+  };
 
   const filteredComponents = components.filter(component => {
     const matchesSearch = component.component_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -65,7 +84,9 @@ export default function DatabaseManagement() {
         <Card className="shadow-2xl bg-white/58 backdrop-blur-md h-full relative">
           <div className="absolute inset-0 p-6 flex flex-col">
             <div className="flex justify-between items-center mb-6 flex-shrink-0">
-              <h1 className="text-3xl font-bold text-gray-800 bg-white/50 px-4 py-2 rounded-lg shadow-sm">Component Library</h1>
+              <h1 className="text-3xl font-bold text-gray-800 bg-white/50 px-4 py-2 rounded-lg shadow-sm">
+                {isFromComponents ? 'Select Component' : 'Component Library'}
+              </h1>
               <div className="flex gap-3">
                 <Button
                   onClick={() => setLocation('/dashboard')}
@@ -91,7 +112,7 @@ export default function DatabaseManagement() {
 
             <div className="flex gap-2 mb-4 flex-wrap">
               <Button
-                variant={selectedCategory === 'all' ? 'default' : 'outline'} 
+                variant={selectedCategory === 'all' ? 'default' : 'outline'}
                 onClick={() => setSelectedCategory('all')}
                 className="rounded-full"
               >
@@ -127,30 +148,30 @@ export default function DatabaseManagement() {
               </Button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 p-4 overflow-y-auto flex-grow scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400">
-              {/* Add Component Card */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <Card
-                  className="group relative overflow-hidden w-[275px] h-[275px] cursor-pointer"
-                  variant="glass"
-                  hover={true}
-                  onClick={() => setShowDialog(true)}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 p-4 overflow-y-auto flex-grow">
+              {!isFromComponents && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
                 >
-                  <div className="h-full flex flex-col items-center justify-center p-6 text-center">
-                    <Plus className="w-12 h-12 text-muted-foreground mb-4" />
-                    <h3 className="font-medium text-lg mb-2">Add Component</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Click to select a component from the database
-                    </p>
-                  </div>
-                </Card>
-              </motion.div>
+                  <Card
+                    className="group relative overflow-hidden w-[275px] h-[275px] cursor-pointer"
+                    variant="glass"
+                    hover={true}
+                    onClick={() => setShowDialog(true)}
+                  >
+                    <div className="h-full flex flex-col items-center justify-center p-6 text-center">
+                      <Plus className="w-12 h-12 text-muted-foreground mb-4" />
+                      <h3 className="font-medium text-lg mb-2">Add Component</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Click to add a new component
+                      </p>
+                    </div>
+                  </Card>
+                </motion.div>
+              )}
 
-              {/* Component Cards */}
               {filteredComponents.map((component) => (
                 <motion.div
                   key={component.id}
@@ -159,11 +180,12 @@ export default function DatabaseManagement() {
                   transition={{ duration: 0.3 }}
                 >
                   <Card 
-                    className="group relative overflow-hidden w-[275px] h-[275px]"
+                    className={`group relative overflow-hidden w-[275px] h-[275px] ${isFromComponents ? 'cursor-pointer' : ''}`}
                     variant="glass"
                     hover={true}
+                    onClick={() => handleComponentClick(component)}
                   >
-                    <div className="h-3/4 relative">
+                    <div className="h-[160px] relative">
                       <img 
                         src={component.image_url || getRandomImage(component.category)}
                         alt={component.name}
@@ -174,8 +196,8 @@ export default function DatabaseManagement() {
                         {component.asset_id}
                       </div>
                     </div>
-                    <div className="h-1/4 p-2 bg-white/80 backdrop-blur-sm flex flex-col">
-                      <h3 className="font-medium text-sm mb-1 line-clamp-1">{component.component_name}</h3>
+                    <div className="h-[115px] p-4 bg-white/80 backdrop-blur-sm">
+                      <h3 className="font-medium text-lg mb-2 line-clamp-1">{component.component_name}</h3>
                       <span className={`px-2 py-1 text-xs font-semibold rounded-full w-fit
                         ${component.category === 'roofing' ? 'bg-red-100 text-red-800' :
                           component.category === 'amenities' ? 'bg-blue-100 text-blue-800' :
@@ -193,7 +215,33 @@ export default function DatabaseManagement() {
         </Card>
       </div>
 
-      <Dialog open={showDialog} onOpenChange={setShowDialog}>
+      <Dialog open={showDialog && selectedComponent !== null} onOpenChange={(open) => {
+        setShowDialog(open);
+        if (!open) setSelectedComponent(null);
+      }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Component to Report</DialogTitle>
+            <DialogDescription>
+              Do you want to add this component to your report?
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedComponent && (
+            <div className="py-4">
+              <h3 className="font-medium text-lg">{selectedComponent.component_name}</h3>
+              <p className="text-sm text-muted-foreground">Category: {selectedComponent.category}</p>
+              <p className="text-sm text-muted-foreground">Asset ID: {selectedComponent.asset_id}</p>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDialog(false)}>Cancel</Button>
+            <Button onClick={handleAddToReport}>Add to Report</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+        <Dialog open={showDialog && !isFromComponents} onOpenChange={setShowDialog}>
         <DialogContent className="max-w-sm mx-auto h-auto max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <div className="flex justify-between items-center">
