@@ -5,23 +5,17 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useLocation } from "wouter";
+import { Component } from "@/hooks/useComponents";
 
-interface Component {
-  id: string;
-  name: string;
-  category: string;
-  description?: string;
-  lastUpdated: string;
+interface ReportComponent extends Component {
   condition: 'new' | 'good' | 'poor' | 'critical';
   placedInService: string;
+  notes?: string;
   photos?: string[];
-  siteNotes?: string;
-  currentCost: number;
-  asset_id?: string;
 }
 
 export default function Components() {
-  const [reportComponents, setReportComponents] = useState<Component[]>([]);
+  const [reportComponents, setReportComponents] = useState<ReportComponent[]>([]);
   const [, setLocation] = useLocation();
   const [location] = useLocation();
 
@@ -32,22 +26,17 @@ export default function Components() {
 
     if (selectedComponentId) {
       // Create a new component from the URL parameters
-      const newComponent: Component = {
-        id: selectedComponentId,
-        asset_id: selectedComponentId,
-        name: params.get('customName') || '',
-        category: '',  // This would come from your component data
-        condition: (params.get('condition') as Component['condition']) || 'good',
+      const newComponent: ReportComponent = {
+        asset_id: parseInt(selectedComponentId),
+        component_name: params.get('customName') || '',
+        category: '',
+        condition: (params.get('condition') as ReportComponent['condition']) || 'good',
         placedInService: params.get('placedInService') || new Date().toISOString(),
-        siteNotes: params.get('notes') || '',
-        lastUpdated: new Date().toISOString(),
-        currentCost: 0,  // This would come from your component data
+        notes: params.get('notes') || '',
         photos: params.get('photos') ? JSON.parse(params.get('photos')!) : []
       };
 
       setReportComponents(prev => [...prev, newComponent]);
-
-      // Clear the URL parameters after adding the component
       setLocation('/components', { replace: true });
     }
   }, [location, setLocation]);
@@ -102,7 +91,7 @@ export default function Components() {
               {/* Display selected components */}
               {reportComponents.map((component) => (
                 <motion.div
-                  key={component.id}
+                  key={component.asset_id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3 }}
@@ -112,7 +101,7 @@ export default function Components() {
                       <div className="h-[160px] relative">
                         <img
                           src={component.photos[0]}
-                          alt={component.name}
+                          alt={component.component_name}
                           className="w-full h-full object-cover"
                         />
                         {component.photos.length > 1 && (
@@ -124,7 +113,7 @@ export default function Components() {
                     )}
                     <div className="p-4 h-[215px] flex flex-col">
                       <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-medium text-lg">{component.name}</h3>
+                        <h3 className="font-medium text-lg">{component.component_name}</h3>
                         <span className="text-xs bg-gray-100 px-2 py-1 rounded">
                           ID: {component.asset_id}
                         </span>
@@ -143,9 +132,9 @@ export default function Components() {
                             {new Date(component.placedInService).toLocaleDateString()}
                           </span>
                         </p>
-                        {component.siteNotes && (
+                        {component.notes && (
                           <p className="text-sm text-muted-foreground line-clamp-3">
-                            Notes: <span className="font-medium">{component.siteNotes}</span>
+                            Notes: <span className="font-medium">{component.notes}</span>
                           </p>
                         )}
                       </div>

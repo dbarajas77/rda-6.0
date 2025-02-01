@@ -13,7 +13,7 @@ export function useComponents() {
     queryKey: ['components'],
     queryFn: async (): Promise<Component[]> => {
       const { data: components, error } = await supabase
-        .from('database')
+        .from('components')
         .select('asset_id, component_name, category')
 
       if (error) throw error
@@ -22,7 +22,7 @@ export function useComponents() {
       const componentsWithImages = components?.map((component) => {
         const { data: imageUrl } = supabase
           .storage
-          .from('database_images')
+          .from('field_image')
           .getPublicUrl(`${component.asset_id}.jpg`)
 
         return {
