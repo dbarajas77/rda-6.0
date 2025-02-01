@@ -146,7 +146,14 @@ export default function DatabaseManagement() {
                     </div>
                     <div className="h-1/4 p-2 bg-white/80 backdrop-blur-sm flex flex-col">
                       <h3 className="font-medium text-sm mb-1 line-clamp-1">{component.component_name}</h3>
-                      <p className="text-xs text-gray-600 capitalize">{component.category}</p>
+                      <span className={`px-2 py-1 text-xs font-semibold rounded-full w-fit
+                        ${component.category === 'roofing' ? 'bg-red-100 text-red-800' :
+                          component.category === 'amenities' ? 'bg-blue-100 text-blue-800' :
+                          component.category === 'building' ? 'bg-green-100 text-green-800' :
+                          'bg-yellow-100 text-yellow-800'
+                        }`}>
+                        {component.category}
+                      </span>
                     </div>
                   </Card>
                 </motion.div>
