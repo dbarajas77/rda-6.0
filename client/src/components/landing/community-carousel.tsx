@@ -1,6 +1,7 @@
-
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabaseClient";
 
 interface Community {
   id: number;
@@ -9,17 +10,16 @@ interface Community {
 }
 
 export default function CommunityCarousel() {
-  // Using Unsplash images for the carousel
+  // Temporary data for demonstration
   const communities = [
-    { id: 1, name: 'Community 1', image_path: 'https://source.unsplash.com/800x600/?house,community' },
-    { id: 2, name: 'Community 2', image_path: 'https://source.unsplash.com/800x600/?apartment,building' },
-    { id: 3, name: 'Community 3', image_path: 'https://source.unsplash.com/800x600/?neighborhood,residential' },
-    { id: 4, name: 'Community 4', image_path: 'https://source.unsplash.com/800x600/?modern,housing' },
+    { id: 1, name: 'Community 1', image_path: 'community-bg.jpg' },
+    { id: 2, name: 'Community 2', image_path: 'community-bg.jpg' },
+    { id: 3, name: 'Community 3', image_path: 'community-bg.jpg' },
   ];
 
-  // Create two rows of communities with unique keys
-  const rowOne = communities.map((c, i) => ({ ...c, uniqueId: `row1-${c.id}` }));
-  const rowTwo = communities.map((c, i) => ({ ...c, uniqueId: `row2-${c.id}` }));
+  // Create two rows of communities by duplicating the array
+  const rowOne = [...communities, ...communities];
+  const rowTwo = [...communities, ...communities];
 
   return (
     <div className="relative w-full overflow-hidden h-[300px]">
@@ -27,7 +27,7 @@ export default function CommunityCarousel() {
       <motion.div
         className="flex gap-4 mb-4"
         animate={{
-          x: [-1500, 0],
+          x: [-225 * (communities.length + 2), 0],
         }}
         transition={{
           x: {
@@ -40,13 +40,13 @@ export default function CommunityCarousel() {
       >
         {rowOne.map((community) => (
           <Card
-            key={community.uniqueId}
-            className="flex-shrink-0 w-[300px] h-[150px] overflow-hidden rounded-lg"
+            key={`${community.id}-1`}
+            className="flex-shrink-0 w-[200px] sm:w-[225px] h-[120px] sm:h-[150px] overflow-hidden"
           >
             <div
-              className="w-full h-full bg-cover bg-center transition-transform hover:scale-110"
+              className="w-full h-full bg-cover bg-center"
               style={{
-                backgroundImage: `url(${community.image_path})`,
+                backgroundImage: `url(${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/communities/${community.image_path})`,
               }}
             />
           </Card>
@@ -57,7 +57,7 @@ export default function CommunityCarousel() {
       <motion.div
         className="flex gap-4"
         animate={{
-          x: [0, -1500],
+          x: [0, -225 * (communities.length + 2)],
         }}
         transition={{
           x: {
@@ -70,13 +70,13 @@ export default function CommunityCarousel() {
       >
         {rowTwo.map((community) => (
           <Card
-            key={community.uniqueId}
-            className="flex-shrink-0 w-[300px] h-[150px] overflow-hidden rounded-lg"
+            key={`${community.id}-2`}
+            className="flex-shrink-0 w-[200px] sm:w-[225px] h-[120px] sm:h-[150px] overflow-hidden"
           >
             <div
-              className="w-full h-full bg-cover bg-center transition-transform hover:scale-110"
+              className="w-full h-full bg-cover bg-center"
               style={{
-                backgroundImage: `url(${community.image_path})`,
+                backgroundImage: `url(${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/communities/${community.image_path})`,
               }}
             />
           </Card>
