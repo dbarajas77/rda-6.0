@@ -98,11 +98,11 @@ export default function DatabaseManagement() {
                   transition={{ duration: 0.3 }}
                 >
                   <Card 
-                    className="group relative overflow-hidden h-[360px]"
+                    className="group relative overflow-hidden w-[275px] h-[275px]"
                     variant="glass"
                     hover={true}
                   >
-                    <div className="aspect-[4/3] w-full relative">
+                    <div className="h-3/4 relative">
                       <img 
                         src={component.image_url || getRandomImage(component.category)}
                         alt={component.name}
@@ -110,13 +110,13 @@ export default function DatabaseManagement() {
                         loading="lazy"
                       />
                       <div className="absolute top-2 left-2 bg-white/90 px-2 py-1 rounded text-xs font-medium text-gray-600">
-                        {component.id}
+                        {component.asset_id}
                       </div>
                     </div>
-                    <div className="p-4 bg-white/80 backdrop-blur-sm">
-                      <h3 className="font-medium text-lg mb-2 line-clamp-1">{component.name}</h3>
-                      <p className="text-sm text-gray-600 capitalize mb-2">{component.category}</p>
-                      <div className="flex flex-col gap-1 text-sm text-gray-500">
+                    <div className="h-1/4 p-2 bg-white/80 backdrop-blur-sm">
+                      <h3 className="font-medium text-sm mb-1 line-clamp-1">{component.component_name}</h3>
+                      <p className="text-xs text-gray-600 capitalize">{component.category}</p>
+                    </div>
                         <p>Useful Life: {component.useful_life} years</p>
                         <p>Current Cost: ${component.current_cost?.toLocaleString()}</p>
                       </div>
