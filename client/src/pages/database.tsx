@@ -18,6 +18,8 @@ interface Component {
   useful_life: number;
   current_cost: number;
   image_url?: string;
+  component_name?: string; // Added to handle potential missing property
+  asset_id?: string; // Added to handle potential missing property
 }
 
 const getRandomImage = (category: string) => {
@@ -33,12 +35,19 @@ const getRandomImage = (category: string) => {
 };
 
 export default function DatabaseManagement() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [showDialog, setShowDialog] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [newComponent, setNewComponent] = useState<Partial<Component>>({});
   const [, setLocation] = useLocation();
   const { data: components = [], isLoading } = useComponents();
+
+  const filteredComponents = components.filter(component => {
+    const matchesSearch = component.component_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         component.asset_id?.toString().includes(searchQuery);
+    const matchesCategory = selectedCategory === "all" || component.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   return (
     <div className="min-h-screen bg-cover bg-center relative">
@@ -66,6 +75,28 @@ export default function DatabaseManagement() {
               </div>
             </div>
 
+            <div className="flex items-center mb-4">
+              <Input
+                type="text"
+                placeholder="Search components..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full mr-4"
+              />
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Filter by category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="roofing">Roofing</SelectItem>
+                  <SelectItem value="amenities">Amenities</SelectItem>
+                  <SelectItem value="building">Building</SelectItem>
+                  <SelectItem value="landscape">Landscape</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 p-4 overflow-y-auto flex-grow scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400">
               {/* Add Component Card */}
               <motion.div
@@ -90,7 +121,7 @@ export default function DatabaseManagement() {
               </motion.div>
 
               {/* Component Cards */}
-              {components.map((component) => (
+              {filteredComponents.map((component) => (
                 <motion.div
                   key={component.id}
                   initial={{ opacity: 0, y: 20 }}
