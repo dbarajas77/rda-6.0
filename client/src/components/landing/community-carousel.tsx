@@ -46,7 +46,7 @@ export default function CommunityCarousel() {
             <div
               className="w-full h-full bg-cover bg-center"
               style={{
-                backgroundImage: `url(${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/communities/${community.image_path})`,
+                backgroundImage: `url(${community.image_path})`,
               }}
             />
           </Card>
@@ -76,7 +76,7 @@ export default function CommunityCarousel() {
             <div
               className="w-full h-full bg-cover bg-center"
               style={{
-                backgroundImage: `url(${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/communities/${community.image_path})`,
+                backgroundImage: `url(${community.image_path})`,
               }}
             />
           </Card>
