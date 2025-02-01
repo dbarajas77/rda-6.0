@@ -1,4 +1,3 @@
-
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
@@ -10,62 +9,6 @@ import OpenAI from "openai";
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-
-// Mock documents data with permissions
-const mockDocuments = [
-  {
-    id: "1",
-    name: "HOA Bylaws 2024",
-    description: "Updated bylaws for the year 2024",
-    category: "bylaws",
-    createdAt: "2024-01-15",
-    size: "2.4 MB",
-    url: "https://www.africau.edu/images/default/sample.pdf",
-    ownerId: "1",
-    permissions: [
-      { userId: "2", email: "board@example.com", access: "edit" },
-      { userId: "3", email: "member@example.com", access: "view" }
-    ]
-  },
-  {
-    id: "2",
-    name: "Q4 2023 Meeting Minutes",
-    description: "Board meeting minutes from Q4 2023",
-    category: "minutes",
-    createdAt: "2023-12-20",
-    size: "1.1 MB",
-    url: "https://www.africau.edu/images/default/sample.pdf",
-    ownerId: "1",
-    permissions: [
-      { userId: "4", email: "secretary@example.com", access: "edit" }
-    ]
-  },
-  {
-    id: "3",
-    name: "Annual Financial Report",
-    description: "Financial report for fiscal year 2023",
-    category: "financial",
-    createdAt: "2024-01-10",
-    size: "3.2 MB",
-    url: "https://www.africau.edu/images/default/sample.pdf",
-    ownerId: "1",
-    permissions: [
-      { userId: "5", email: "treasurer@example.com", access: "admin" },
-      { userId: "6", email: "accountant@example.com", access: "view" }
-    ]
-  },
-  {
-    id: "4",
-    name: "Maintenance Request Form",
-    description: "Standard form for maintenance requests",
-    category: "forms",
-    createdAt: "2024-01-20",
-    size: "521 KB",
-    url: "https://www.africau.edu/images/default/sample.pdf",
-    ownerId: "1",
-    permissions: []
-  }
-];
 
 export function registerRoutes(app: Express): Server {
   setupAuth(app);
@@ -111,8 +54,22 @@ export function registerRoutes(app: Express): Server {
 
   // Documents API
   app.get("/api/documents", async (req, res) => {
-    // Return mock data for now
-    res.json(mockDocuments);
+    if (!req.isAuthenticated()) {
+      return res.status(401).send("Not authenticated");
+    }
+
+    try {
+      const userDocuments = await db.query.documents.findMany({
+        where: eq(documents.userId, req.user.id),
+        orderBy: (documents, { desc }) => [desc(documents.createdAt)]
+      });
+      res.json(userDocuments);
+    } catch (error: any) {
+      res.status(500).json({ 
+        error: "Failed to fetch documents",
+        details: error.message 
+      });
+    }
   });
 
   app.post("/api/documents/upload", async (req, res) => {
@@ -121,8 +78,25 @@ export function registerRoutes(app: Express): Server {
     }
 
     try {
-      // Handle file upload logic here
-      res.json({ message: "File uploaded successfully" });
+      const { data: uploadData, error: uploadError } = await supabase
+        .storage
+        .from('documents')
+        .upload(req.body.fileName, req.body.fileData);
+
+      if (uploadError) throw uploadError;
+
+      const { data: document } = await supabase
+        .from('documents')
+        .insert({
+          name: req.body.fileName,
+          type: req.body.fileType,
+          url: uploadData.path,
+          userId: req.user.id
+        })
+        .select()
+        .single();
+
+      res.json(document);
     } catch (error: any) {
       console.error('Upload Error:', error);
       res.status(500).json({ 
@@ -132,20 +106,6 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  app.get("/api/documents/:id/download", async (req, res) => {
-    if (!req.isAuthenticated()) {
-      return res.status(401).send("Not authenticated");
-    }
-
-    const document = mockDocuments.find(d => d.id === req.params.id);
-    if (!document) {
-      return res.status(404).json({ error: "Document not found" });
-    }
-
-    // In real implementation, stream the file from storage
-    res.json({ downloadUrl: document.url });
-  });
-
   // Report Generation endpoint
   app.post("/api/reports/generate", async (req, res) => {
     if (!req.isAuthenticated()) {
@@ -153,7 +113,6 @@ export function registerRoutes(app: Express): Server {
     }
 
     try {
-      // Get user's scenarios and documents
       const userScenarios = await db.query.scenarios.findMany({
         where: eq(scenarios.userId, req.user.id),
         orderBy: (scenarios, { desc }) => [desc(scenarios.createdAt)]
@@ -186,12 +145,11 @@ export function registerRoutes(app: Express): Server {
       });
 
       const reportContent = completion.choices[0].message.content;
-      
-      // Store the generated report
+
       const [report] = await db.insert(documents).values({
         name: `Reserve Study Report - ${new Date().toLocaleDateString()}`,
         type: 'report',
-        url: '#', // URL would be generated after storing the document
+        url: '#',
         userId: req.user.id
       }).returning();
 
@@ -215,10 +173,13 @@ export function registerRoutes(app: Express): Server {
     }
 
     try {
-      const components = await db.query.components.findMany({
-        where: eq(components.userId, req.user.id),
-        orderBy: (components, { desc }) => [desc(components.createdAt)]
-      });
+      const { data: components, error } = await supabase
+        .from('components')
+        .select('*')
+        .eq('user_id', req.user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
       res.json(components);
     } catch (error: any) {
       console.error('Fetch Components Error:', error);
@@ -229,11 +190,59 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  app.post("/api/components", async (req, res) => {
+  // Field Notes API endpoints
+  app.post("/api/field-notes", async (req, res) => {
     if (!req.isAuthenticated()) {
       return res.status(401).send("Not authenticated");
     }
 
+    try {
+      const { data: fieldNote, error } = await supabase
+        .from('field_notes')
+        .insert({
+          asset_id: req.body.asset_id,
+          component_name: req.body.component_name,
+          condition_id: req.body.condition_id,
+          placed_in_service: req.body.placed_in_service,
+          notes: req.body.notes,
+          photo1_path: req.body.photo1_path,
+          photo2_path: req.body.photo2_path,
+          photo3_path: req.body.photo3_path,
+          user_id: req.user.id
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      res.json(fieldNote);
+    } catch (error: any) {
+      console.error('Create Field Note Error:', error);
+      res.status(500).json({ 
+        error: "Failed to create field note",
+        details: error.message 
+      });
+    }
+  });
+
+  // Existing routes for scenarios
+  app.get("/api/scenarios", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).send("Not authenticated");
+    }
+
+    const userScenarios = await db.query.scenarios.findMany({
+      where: eq(scenarios.userId, req.user.id),
+      orderBy: (scenarios, { desc }) => [desc(scenarios.createdAt)]
+    });
+
+    res.json(userScenarios);
+  });
+  
+    app.post("/api/components", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).send("Not authenticated");
+    }
+  
     try {
       const [component] = await db.insert(components).values({
         ...req.body,
@@ -351,7 +360,7 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  app.delete("/api/components/:id", async (req, res) => {
+    app.delete("/api/components/:id", async (req, res) => {
     if (!req.isAuthenticated()) {
       return res.status(401).send("Not authenticated");
     }
@@ -372,20 +381,6 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  // Existing routes...
-  app.get("/api/scenarios", async (req, res) => {
-    if (!req.isAuthenticated()) {
-      return res.status(401).send("Not authenticated");
-    }
-
-    const userScenarios = await db.query.scenarios.findMany({
-      where: eq(scenarios.userId, req.user.id),
-      orderBy: (scenarios, { desc }) => [desc(scenarios.createdAt)]
-    });
-
-    res.json(userScenarios);
-  });
-
   app.post("/api/scenarios", async (req, res) => {
     if (!req.isAuthenticated()) {
       return res.status(401).send("Not authenticated");
@@ -397,33 +392,6 @@ export function registerRoutes(app: Express): Server {
     }).returning();
 
     res.json(scenario[0]);
-  });
-
-  // Documents API (Original)
-  app.get("/api/documents", async (req, res) => {
-    if (!req.isAuthenticated()) {
-      return res.status(401).send("Not authenticated");
-    }
-
-    const userDocuments = await db.query.documents.findMany({
-      where: eq(documents.userId, req.user.id),
-      orderBy: (documents, { desc }) => [desc(documents.createdAt)]
-    });
-
-    res.json(userDocuments);
-  });
-
-  app.post("/api/documents", async (req, res) => {
-    if (!req.isAuthenticated()) {
-      return res.status(401).send("Not authenticated");
-    }
-
-    const document = await db.insert(documents).values({
-      ...req.body,
-      userId: req.user.id
-    }).returning();
-
-    res.json(document[0]);
   });
 
   // Annotation Routes
@@ -503,7 +471,7 @@ export function registerRoutes(app: Express): Server {
       });
     }
   });
-
+  
   app.delete("/api/annotations/:annotationId", async (req, res) => {
     if (!req.isAuthenticated()) {
       return res.status(401).send("Not authenticated");

@@ -5,84 +5,19 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Search, Upload, Plus, MessageCircle } from "lucide-react";
+import { Search, Upload, Plus, MessageCircle, X } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLocation } from "wouter";
+import { supabase } from "@/lib/supabaseClient";
 
 interface Photo {
   id: string;
   url: string;
   title: string;
   category: 'general' | 'maintenance' | 'issue' | 'landscape' | 'amenities';
-  createdAt: string;
+  created_at: string;
   notes?: string[];
 }
-
-const mockPhotos: Photo[] = [
-  {
-    id: "1",
-    url: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c",
-    title: "Community Pool",
-    category: 'amenities',
-    createdAt: "2024-01-15",
-    notes: ["New tiles installed", "Water treatment system upgraded"]
-  },
-  {
-    id: "2",
-    url: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d",
-    title: "Playground Equipment",
-    category: 'maintenance',
-    createdAt: "2024-01-20",
-    notes: ["All equipment in good condition", "Minor rust on swing set - scheduled for treatment"]
-  },
-  {
-    id: "3",
-    url: "https://images.unsplash.com/photo-1600607687644-4e2a09cf159d",
-    title: "Drainage Issue",
-    category: 'issue',
-    createdAt: "2024-01-25",
-    notes: ["Standing water near building A", "Requires immediate attention"]
-  },
-  {
-    id: "4",
-    url: "https://images.unsplash.com/photo-1560518883-ce09059eeffa",
-    title: "Main Entrance",
-    category: 'landscape',
-    createdAt: "2024-01-28",
-    notes: ["Spring flowers planted", "New lighting installed"]
-  },
-  {
-    id: "5",
-    url: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6",
-    title: "Clubhouse Exterior",
-    category: 'general',
-    createdAt: "2024-01-30",
-    notes: ["Fresh paint completed", "New signage installed"]
-  },
-  {
-    id: "6",
-    url: "https://images.unsplash.com/photo-1580587771525-78b9dba3b914",
-    title: "Tennis Courts",
-    category: 'amenities',
-    createdAt: "2024-02-01",
-    notes: ["Resurfacing complete", "New nets installed"]
-  },
-  {
-    id: "7",
-    url: "https://images.unsplash.com/photo-1576941089067-2de3c901e126",
-    title: "Walking Trail",
-    category: 'landscape',
-    createdAt: "2024-02-02",
-    notes: ["Trail markers updated", "New benches installed"]
-  },
-  {
-    id: "8",
-    url: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750",
-    title: "Landscaping Update",
-    category: 'maintenance',
-    createdAt: "2024-02-03"
-  }
-];
 
 export default function CommunityPhotos() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -92,36 +27,72 @@ export default function CommunityPhotos() {
   const [showEnlargedView, setShowEnlargedView] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [, setLocation] = useLocation();
-  const [photos, setPhotos] = useState(mockPhotos); // Added state to manage photos
 
-  const { data: photosData = mockPhotos, isLoading } = useQuery<Photo[]>({
+  const { data: photos = [], isLoading } = useQuery<Photo[]>({
     queryKey: ['community-photos'],
-    queryFn: async () => mockPhotos
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('community_photos')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    }
   });
 
   const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    console.log('Uploading photo:', file.name);
-    setShowUploadDialog(false);
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}.${fileExt}`;
+      const { error: uploadError } = await supabase
+        .storage
+        .from('community_photos')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase
+        .storage
+        .from('community_photos')
+        .getPublicUrl(fileName);
+
+      const { error: dbError } = await supabase
+        .from('community_photos')
+        .insert({
+          url: publicUrl,
+          title: file.name,
+          category: selectedCategory as Photo['category']
+        });
+
+      if (dbError) throw dbError;
+
+      setShowUploadDialog(false);
+    } catch (error) {
+      console.error('Error uploading photo:', error);
+    }
   };
 
-  const handleAddNote = () => {
+  const handleAddNote = async () => {
     if (!newNote.trim() || !selectedPhoto) return;
 
-    const updatedPhotos = photos.map(photo => {
-      if (photo.id === selectedPhoto.id) {
-        return {
-          ...photo,
-          notes: [...(photo.notes || []), newNote]
-        };
-      }
-      return photo;
-    });
+    try {
+      const { error } = await supabase
+        .from('photo_notes')
+        .insert({
+          photo_id: selectedPhoto.id,
+          content: newNote
+        });
 
-    setNewNote("");
-    setPhotos(updatedPhotos); // Update photos state
-    console.log('Updated photos:', updatedPhotos);
+      if (error) throw error;
+
+      setNewNote("");
+    } catch (error) {
+      console.error('Error adding note:', error);
+    }
   };
 
   const filteredPhotos = photos.filter(photo =>
@@ -159,10 +130,10 @@ export default function CommunityPhotos() {
                         url: "https://picsum.photos/800/600",
                         title: `Test Photo ${photos.length + 1}`,
                         category: ['general', 'maintenance', 'issue', 'landscape', 'amenities'][Math.floor(Math.random() * 5)] as any,
-                        createdAt: new Date().toISOString(),
+                        created_at: new Date().toISOString(),
                         notes: [`Test note ${Math.random()}`]
                       };
-                      setPhotos([...photos, newPhoto]);
+                      //setPhotos([...photos, newPhoto]); This line was removed
                     }}
                     variant="outline"
                   >
@@ -230,7 +201,7 @@ export default function CommunityPhotos() {
                       <h3 className="font-medium text-lg mb-2 line-clamp-1">{photo.title}</h3>
                       <p className="text-sm text-muted-foreground capitalize mb-2">{photo.category}</p>
                       <div className="text-xs text-muted-foreground">
-                        Added: {new Date(photo.createdAt).toLocaleDateString()}
+                        Added: {new Date(photo.created_at).toLocaleDateString()}
                       </div>
                     </div>
                   </Card>
@@ -268,7 +239,11 @@ export default function CommunityPhotos() {
               placeholder="Enter photo title"
               className="border-blue-200 focus:border-blue-400 shadow-md focus:shadow-xl"
             />
-            <select className="w-full p-2 rounded-md border border-blue-200 focus:border-blue-400 shadow-md focus:shadow-xl">
+            <select 
+              className="w-full p-2 rounded-md border border-blue-200 focus:border-blue-400 shadow-md focus:shadow-xl"
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+            >
               <option value="general">General</option>
               <option value="maintenance">Maintenance</option>
               <option value="issue">Issue</option>
