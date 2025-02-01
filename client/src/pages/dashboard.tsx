@@ -4,18 +4,6 @@ import QuickAccess from "@/components/dashboard/quick-access";
 export default function Dashboard() {
   return (
     <div className="min-h-screen bg-cover bg-center relative">
-      {/* Background Image with Overlay */}
-      <div 
-        className="fixed inset-0 bg-cover bg-center bg-no-repeat z-0"
-        style={{
-          backgroundImage: 'url("https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3")',
-          backgroundAttachment: 'fixed'
-        }}
-      />
-
-      {/* White overlay with blur */}
-      <div className="fixed inset-0 bg-white/58 backdrop-blur-[2px] z-10" />
-
       {/* Content */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}

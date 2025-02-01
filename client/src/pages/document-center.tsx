@@ -314,7 +314,7 @@ export default function DocumentCenter() {
             {selectedDocument?.url ? (
               <div className="relative h-full">
                 <iframe
-                  src={selectedDocument.url}
+                  src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/documents/${selectedDocument.url}`}
                   className="absolute inset-0 w-full h-full"
                   title={selectedDocument.name}
                   style={{ border: 'none' }}

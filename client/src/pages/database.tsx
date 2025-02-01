@@ -227,7 +227,7 @@ export default function DatabaseManagement() {
 
               {filteredComponents.map((component) => (
                 <motion.div
-                  key={component.id}
+                  key={component.asset_id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3 }}
@@ -240,8 +240,8 @@ export default function DatabaseManagement() {
                   >
                     <div className="h-[160px] relative">
                       <img 
-                        src={component.image_url || `https://source.unsplash.com/featured/800x600/?${component.category}`}
-                        alt={component.name}
+                        src={component.image_url || `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/components/${component.asset_id}`}
+                        alt={component.component_name}
                         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                         loading="lazy"
                       />

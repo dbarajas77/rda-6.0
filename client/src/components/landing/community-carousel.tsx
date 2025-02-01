@@ -1,44 +1,32 @@
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabaseClient";
 
-const communities = [
-  {
-    id: 1,
-    image: "https://images.unsplash.com/photo-1449844908441-8829872d2607?w=800&auto=format&fit=crop&q=60",
-    name: "Sunset Gardens"
-  },
-  {
-    id: 2,
-    image: "https://images.unsplash.com/photo-1594484208280-efa00f96fc21?w=800&auto=format&fit=crop&q=60",
-    name: "Oak Valley"
-  },
-  {
-    id: 3,
-    image: "https://images.unsplash.com/photo-1565402170291-8491f14678db?w=800&auto=format&fit=crop&q=60",
-    name: "Pine Ridge"
-  },
-  {
-    id: 4,
-    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&auto=format&fit=crop&q=60",
-    name: "Maple Heights"
-  },
-  {
-    id: 5,
-    image: "https://images.unsplash.com/photo-1574362848149-11496d93a7c7?w=800&auto=format&fit=crop&q=60",
-    name: "Cedar Creek"
-  },
-  {
-    id: 6,
-    image: "https://images.unsplash.com/photo-1591474200742-8e512e6f98f8?w=800&auto=format&fit=crop&q=60",
-    name: "Willow Park"
-  },
-];
-
-// Create two rows of communities by duplicating the array
-const rowOne = [...communities, ...communities];
-const rowTwo = [...communities, ...communities];
+interface Community {
+  id: number;
+  name: string;
+  image_path: string;
+}
 
 export default function CommunityCarousel() {
+  const { data: communities = [] } = useQuery<Community[]>({
+    queryKey: ['communities'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('communities')
+        .select('*')
+        .order('id', { ascending: true });
+
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
+  // Create two rows of communities by duplicating the array
+  const rowOne = [...communities, ...communities];
+  const rowTwo = [...communities, ...communities];
+
   return (
     <div className="relative w-full overflow-hidden">
       {/* Top row - moving right */}
@@ -64,7 +52,7 @@ export default function CommunityCarousel() {
             <div
               className="w-full h-full bg-cover bg-center"
               style={{
-                backgroundImage: `url(${community.image})`,
+                backgroundImage: `url(${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/communities/${community.image_path})`,
               }}
             />
           </Card>
@@ -94,7 +82,7 @@ export default function CommunityCarousel() {
             <div
               className="w-full h-full bg-cover bg-center"
               style={{
-                backgroundImage: `url(${community.image})`,
+                backgroundImage: `url(${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/communities/${community.image_path})`,
               }}
             />
           </Card>
