@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useLocation } from "wouter";
 import { Textarea } from "@/components/ui/textarea";
 import { useComponents } from "@/hooks/useComponents";
+import { saveFieldNote } from '@/lib/api';
+import { useToast } from '@/hooks/use-toast';
 
 interface Component {
   id: string;
@@ -42,6 +44,7 @@ export default function DatabaseManagement() {
     customName: '',
     photos: []
   });
+  const { toast } = useToast();
 
   // Check if we came from the components page
   const isFromComponents = location.includes('from=components');
@@ -68,19 +71,47 @@ export default function DatabaseManagement() {
     }
   };
 
-  const handleAddToReport = () => {
-    if (selectedComponent && isFromComponents) {
-      // Navigate back to components page with all the component data
-      const queryParams = new URLSearchParams({
-        selected: selectedComponent.asset_id || '',
-        condition: formData.condition,
-        placedInService: formData.placedInService,
-        notes: formData.notes,
-        customName: formData.customName,
-        photos: JSON.stringify(formData.photos)
+  const handleAddToReport = async () => {
+    if (!selectedComponent) return;
+
+    try {
+      // Save to database
+      const fieldNoteData = {
+        asset_id: selectedComponent.asset_id || '',
+        component_name: formData.customName,
+        condition_id: formData.condition,
+        placed_in_service: formData.placedInService,
+        notes: formData.notes
+      };
+
+      await saveFieldNote(fieldNoteData, formData.photos);
+
+      if (isFromComponents) {
+        // Navigate back to components page with the data
+        const queryParams = new URLSearchParams({
+          selected: selectedComponent.asset_id || '',
+          condition: formData.condition,
+          placedInService: formData.placedInService,
+          notes: formData.notes,
+          customName: formData.customName,
+          photos: JSON.stringify(formData.photos)
+        });
+        setLocation(`/components?${queryParams.toString()}`);
+      }
+
+      toast({
+        title: "Success",
+        description: "Component details saved successfully",
       });
-      setLocation(`/components?${queryParams.toString()}`);
+    } catch (error) {
+      console.error('Error saving component:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save component details",
+        variant: "destructive"
+      });
     }
+
     setShowComponentForm(false);
     setSelectedComponent(null);
   };
