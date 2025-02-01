@@ -126,7 +126,7 @@ export default function DatabaseManagement() {
       </div>
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="max-w-sm mx-auto h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-sm mx-auto h-auto max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <div className="flex justify-between items-center">
               <DialogTitle className="text-xl">Add New Component</DialogTitle>
@@ -136,12 +136,12 @@ export default function DatabaseManagement() {
             </div>
           </DialogHeader>
 
-          <div className="flex flex-col space-y-6 p-4">
-            <div className="grid grid-cols-2 gap-4">
+          <div className="flex flex-col space-y-4 p-4">
+            <div className="flex flex-col space-y-3">
               {[1, 2].map((index) => (
                 <div 
                   key={index} 
-                  className="aspect-square border-2 border-dashed rounded-xl p-4 hover:border-blue-400 hover:bg-blue-50/50 transition-all duration-300 cursor-pointer relative group"
+                  className="h-32 border-2 border-dashed rounded-xl p-4 hover:border-blue-400 hover:bg-blue-50/50 transition-all duration-300 cursor-pointer relative group"
                 >
                   <input 
                     type="file" 
