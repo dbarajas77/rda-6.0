@@ -126,7 +126,7 @@ export default function DatabaseManagement() {
       </div>
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="max-w-5xl">
+        <DialogContent className="max-w-sm mx-auto h-[90vh] overflow-y-auto">
           <DialogHeader>
             <div className="flex justify-between items-center">
               <DialogTitle className="text-xl">Add New Component</DialogTitle>
